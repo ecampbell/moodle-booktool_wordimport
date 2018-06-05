@@ -17,7 +17,7 @@
 /**
  * Privacy information for administration tool upload enrolment methods- no user data stored.
  *
- * @package     atto_wordimport
+ * @package     booktool_wordimport
  * @copyright   2018 Eoin Campbell
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
