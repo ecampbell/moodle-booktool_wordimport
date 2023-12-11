@@ -252,6 +252,18 @@
                 <xsl:with-param name="styleProperty" select="$stylePropertyRemainder"/>
             </xsl:apply-templates>
         </xsl:when>
+        <xsl:when test="$stylePropertyFirst = 'padding:0'">
+            <!-- Omit zero padding -->
+            <xsl:apply-templates select="." mode="styleProperty">
+                <xsl:with-param name="styleProperty" select="$stylePropertyRemainder"/>
+            </xsl:apply-templates>
+        </xsl:when>
+        <xsl:when test="$stylePropertyFirst = 'border:none windowtext 0px'">
+            <!-- Omit blank border -->
+            <xsl:apply-templates select="." mode="styleProperty">
+                <xsl:with-param name="styleProperty" select="$stylePropertyRemainder"/>
+            </xsl:apply-templates>
+        </xsl:when>
         <xsl:otherwise>
             <!-- Keep any remaining styles, such as strikethrough or font size changes, using a span element with a style attribute containing only those styles not already handled -->
             <!--<xsl:comment><xsl:value-of select="concat('$stylePropertyRemainder = ', $stylePropertyRemainder, '; $stylePropertyFirst = ', $stylePropertyFirst)"/></xsl:comment>-->
@@ -569,8 +581,66 @@
     <xsl:template match="x:table">
         <!-- If not in qformat and a table contains a heading in the first heading cell, then it's a text panel, and we use the Bootstrap panel class -->
         <xsl:variable name="tblHeadingClass" select="x:thead/x:tr[1]/x:th[1]/x:p[1]/@class"/>
+        <xsl:variable name="tblRowClass" select="x:tbody/x:tr[1]/x:td[1]/x:p[1]/@class"/>
         <xsl:variable name="panelType" select="concat('panel-type', substring-after($tblHeadingClass, 'heading'))"/>
+        <xsl:variable name="tblSeqNum" select="position()"/>
+        <xsl:variable name="tabRows" select="count(x:tbody/x:tr)"/>
         <xsl:choose>
+        <xsl:when test="starts-with($tblRowClass, 'tabhorz') and ($pluginname != 'qformat_wordtable')">
+            <div class="tab tab-horz">
+                <ul class="row nav" role="tablist">
+                    <xsl:apply-templates select="x:tbody/x:tr/x:td[1]/x:p" mode="tabHorzList">
+                        <xsl:with-param name="nRows" select="$tabRows"/>
+                        <xsl:with-param name="tblSeqNum" select="$tblSeqNum"/>
+                    </xsl:apply-templates>
+                </ul>
+                
+                <div class="tab-content">
+                    <xsl:apply-templates select="x:tbody/x:tr/x:td[2]" mode="tabHorzContent">
+                        <xsl:with-param name="nRows" select="$tabRows"/>
+                        <xsl:with-param name="tblSeqNum" select="$tblSeqNum"/>
+                    </xsl:apply-templates>
+                </div>
+            </div>
+        </xsl:when>
+        <xsl:when test="starts-with($tblRowClass, 'tabvert') and ($pluginname != 'qformat_wordtable')">
+            <div class="row tab tab-vert">
+                <div class="col-sm-3">
+                    <xsl:comment><xsl:value-of select="concat('tabRows:', $tabRows, '; tblSeqNum: ', $tblSeqNum)"/></xsl:comment>
+                    <ul class="nav" role="tablist">
+                        <xsl:apply-templates select="x:tbody/x:tr/x:td[1]/x:p" mode="tabVertList">
+                            <xsl:with-param name="tblSeqNum" select="$tblSeqNum"/>
+                        </xsl:apply-templates>
+                    </ul>
+                </div>
+                <div class="col-sm-9">
+                    <div class="tab-content">
+                        <xsl:apply-templates select="x:tbody/x:tr/x:td[2]" mode="tabVertContent">
+                            <xsl:with-param name="tblSeqNum" select="$tblSeqNum"/>
+                        </xsl:apply-templates>
+                    </div>
+                </div>
+            </div>
+        </xsl:when>
+        <xsl:when test="starts-with($tblRowClass, 'accord') and ($pluginname != 'qformat_wordtable')">
+            <xsl:variable name="accordionType">
+                <xsl:choose>
+                <xsl:when test="$tblRowClass = 'accordbull'">
+                    <xsl:text>clearfix</xsl:text>
+                </xsl:when>
+                <xsl:otherwise> <!-- Numbered -->
+                    <xsl:text>accordion-num</xsl:text>
+                </xsl:otherwise>
+                </xsl:choose>
+            </xsl:variable>
+            <xsl:variable name="accordionClass" select="concat('panel-group accordion ', $accordionType)"/> 
+
+            <div class="{$accordionClass}" role="tablist" aria-muliselectable="true">
+                    <xsl:apply-templates select="x:tbody/x:tr" mode="accordionContent">
+                        <xsl:with-param name="accordionType" select="$accordionType"/>
+                    </xsl:apply-templates>
+            </div>
+        </xsl:when>
         <xsl:when test="starts-with($tblHeadingClass, 'heading') and ($pluginname != 'qformat_wordtable')">
             <div class="{concat('panel ', $panelType)}">
                 <div class="panel-heading">
@@ -759,6 +829,122 @@
             <xsl:value-of select="translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')"/>
         </xsl:attribute>
     </xsl:template>
+
+<xsl:template match="x:p" mode="tabHorzList">
+    <xsl:param name="nRows"/>
+    <xsl:param name="tblSeqNum"/>
+    <!-- First item is active, the rest are not -->
+    <xsl:variable name="listClass">
+        <xsl:text>col-xs-12 </xsl:text>
+        <xsl:choose>
+        <xsl:when test="$nRows = 3">
+            <xsl:text>col-sm-4</xsl:text>
+        </xsl:when>
+        <xsl:when test="$nRows = 4">
+            <xsl:text>col-sm-3</xsl:text>
+        </xsl:when>
+        <xsl:otherwise>
+            <xsl:text>col-sm-15</xsl:text>
+        </xsl:otherwise>
+        </xsl:choose>
+        <xsl:if test="position() = 1">
+            <xsl:text> active</xsl:text>
+        </xsl:if>
+    </xsl:variable>
+    <xsl:variable name="listRefID" select="concat('htab', $tblSeqNum, '_', position())"/>
+    <li class="{$listClass}">
+        <a href="{concat('#', $listRefID)}" aria-controls="{$listRefID}" role="tab" data-toggle="tab">
+            <xsl:apply-templates select="."/>
+        </a>
+    </li>
+</xsl:template>
+
+<xsl:template match="x:td" mode="tabHorzContent">
+    <xsl:param name="nRows"/>
+    <xsl:param name="tblSeqNum"/>
+    <!-- First item is active, the rest are not -->
+    <xsl:variable name="divClass">
+        <xsl:text>tab-pane</xsl:text>
+        <xsl:if test="position() = 1">
+            <xsl:text> in active</xsl:text>
+        </xsl:if>
+    </xsl:variable>
+    <xsl:variable name="divItemID" select="concat('htab', $tblSeqNum, '_', position())"/>
+    <div id="{$divItemID}" class="{$divClass}" role="tabpanel">
+        <xsl:apply-templates select="."/>
+    </div>
+</xsl:template>
+
+<xsl:template match="x:p" mode="tabVertList">
+    <xsl:param name="tblSeqNum"/>
+    <xsl:variable name="listRefID" select="concat('htab', $tblSeqNum, '_', position())"/>
+    <li>
+        <!-- First item is active, the rest are not -->
+        <xsl:if test="position() = 1">
+            <xsl:attribute name="class" select="'active'"/>
+        </xsl:if>
+        <a href="{concat('#', $listRefID)}" aria-controls="{$listRefID}" role="tab" data-toggle="tab">
+            <xsl:apply-templates select="."/>
+        </a>
+    </li>
+</xsl:template>
+
+<xsl:template match="x:td" mode="tabVertContent">
+    <xsl:param name="tblSeqNum"/>
+    <!-- First item is active, the rest are not -->
+    <xsl:variable name="divClass">
+        <xsl:text>tab-pane</xsl:text>
+        <xsl:if test="position() = 1">
+            <xsl:text> in active</xsl:text>
+        </xsl:if>
+    </xsl:variable>
+    <xsl:variable name="divItemID" select="concat('htab', $tblSeqNum, '_', position())"/>
+    <div id="{$divItemID}" class="{$divClass}" role="tabpanel">
+        <xsl:apply-templates select="."/>
+    </div>
+</xsl:template>
+
+<xsl:template match="x:tr" mode="accordionContent">
+    <xsl:param name="accordionType"/>
+    <xsl:variable name="cellCount" select="count(x:td)"/>
+    <xsl:variable name="cellClass" select="x:td[1]/x:p[1]/@class"/>
+    <xsl:variable name="divClass">
+        <xsl:text>panel-heading</xsl:text>
+        <xsl:if test="$accordionType = 'accordion-num'">
+            <xsl:text> panel-number</xsl:text>
+        </xsl:if>
+    </xsl:variable>
+
+    <xsl:comment><xsl:value-of select="concat('cellCount: ', $cellCount, '; class: ', $cellClass, '; cell: ', x:td[1]/x:p)"/></xsl:comment>
+    <xsl:choose>
+    <xsl:when test="$cellCount = 1 and not(starts-with($cellClass, 'accord'))">
+        <!-- It's a content-only row, so ignore it, because it was handled by the previous row processing. -->
+    </xsl:when>
+    <xsl:otherwise>
+        <div class="panel panel-default">
+            <div class="{$divClass}" role="tab">
+                <!-- Use h6 because it will be promoted by the export ePub utility to h4 -->
+                <h6 class="panel-title">
+                    <a href="" role="button" data-toggle="collapse" aria-expanded="false"><xsl:apply-templates select="x:td[1]/*"/></a>
+                </h6>
+            </div>
+            <div class="panel-collapse collapse" role="tabpanel">
+                <div class="panel-body">
+                    <!-- If a single-column table, reach for the next row, otherwise use column 2 -->
+                    <xsl:choose>
+                    <xsl:when test="$cellCount = 1">
+                        <xsl:apply-templates select="following-sibling::x:tr[1]/x:td[1]/*"/>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:apply-templates select="x:td[2]/*"/>
+                    </xsl:otherwise>
+                    </xsl:choose>
+                </div>
+            </div>
+        </div>
+    </xsl:otherwise>
+    </xsl:choose>
+</xsl:template>
 
     <!-- Include debugging information in the output -->
     <xsl:template name="debugComment">
