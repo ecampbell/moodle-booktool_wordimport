@@ -654,7 +654,7 @@
             <div class="row tab tab-vert">
                 <!-- Use a 25/75 split for the column widths -->
                 <div class="col-sm-3">
-                    <xsl:comment><xsl:value-of select="concat('tabRows:', $tabRows, '; tblSeqNum: ', $tblSeqNum)"/></xsl:comment>
+                    <!-- <xsl:comment><xsl:value-of select="concat('tabRows:', $tabRows, '; tblSeqNum: ', $tblSeqNum)"/></xsl:comment>-->
                     <ul class="nav" role="tablist">
                         <xsl:apply-templates select="x:tbody/x:tr/x:td[1]/x:p" mode="BSTabVertList">
                             <xsl:with-param name="tblSeqNum" select="$tblSeqNum"/>
@@ -687,6 +687,20 @@
                     <xsl:apply-templates select="x:tbody/x:tr" mode="BSAccordionContent">
                         <xsl:with-param name="accordionType" select="$accordionType"/>
                     </xsl:apply-templates>
+            </div>
+        </xsl:when>
+        <!-- Brightspace (not Bootstrap) CreatorPlus Carousel -->
+        <xsl:when test="starts-with($tblHeadingClass, 'bscarousel') and ($pluginname != 'qformat_wordtable')">
+            <div class="d2l-element" role="section">
+                <!-- Note: the div/@instruction element must be present! -->
+                <div class="instruction" data-prop="0|null">Click the arrow links to progress through slides.</div>
+                <div class="d2l-cplus-carousel">
+                    <div class="d2l-cplus-carousel-slides-container">
+                        <xsl:apply-templates select="x:tbody/x:tr" mode="BSCarousel">
+                            <xsl:with-param name="nRows" select="$tabRows"/>
+                        </xsl:apply-templates>
+                    </div>
+                </div>
             </div>
         </xsl:when>
         <xsl:when test="starts-with($tblHeadingClass, 'heading') and ($pluginname != 'qformat_wordtable')">
@@ -973,7 +987,7 @@
             </xsl:if>
         </xsl:variable>
 
-        <xsl:comment><xsl:value-of select="concat('cellCount: ', $cellCount, '; class: ', $cellClass, '; cell: ', x:td[1]/x:p)"/></xsl:comment>
+        <!-- <xsl:comment><xsl:value-of select="concat('cellCount: ', $cellCount, '; class: ', $cellClass, '; cell: ', x:td[1]/x:p)"/></xsl:comment> -->
         <xsl:choose>
         <xsl:when test="$cellCount = 1 and not(starts-with($cellClass, 'bsaccord'))">
             <!-- It's a content-only row, so ignore it, because it was handled by the previous row processing. -->
@@ -1002,6 +1016,41 @@
             </div>
         </xsl:otherwise>
         </xsl:choose>
+    </xsl:template>
+
+    <!-- Brightspace CreatorPlus Carousel -->
+    <xsl:template match="x:tr" mode="BSCarousel">
+        <xsl:variable name="posIndex" select="position() - 1"/>
+        <xsl:variable name="firstElementName" select="name(x:td[1]/*[1])"/>
+        <xsl:variable name="firstElementClass" select="x:td[1]/*[1]/@class"/>
+        <xsl:variable name="imageElement" select="name(x:td[1]/*[2])"/>
+
+        <div class="d2l-cplus-carousel-slide" data-itemprop="{$posIndex}">
+            <div class="d2l-cplus-carousel-slide-title" data-carouselprop="{concat($posIndex, '|title')}">
+                <xsl:apply-templates select="x:td[1]/*[1]"/>
+            </div>
+            <div class="d2l-cplus-carousel-slide-image-container">
+                <xsl:apply-templates select="x:td[2]/x:p/x:img" mode="BSCarouselImage"/>
+            </div>
+            <div class="d2l-cplus-carousel-slide-body">
+                <div class="d2l-cplus-carousel-slide-text" data-carouselprop="{concat($posIndex, '|text')}">
+                    <xsl:apply-templates select="x:td[3]/*"/>
+                </div>
+            </div>
+        </div>
+    </xsl:template>
+    
+    <!-- Brightspace CreatorPlus Carousel Image -->
+    <xsl:template match="x:img" mode="BSCarouselImage">
+        <img width="{@width}" height="{@height}" src="{@src}" longdesc="{@longdesc}" class="d2l-cplus-carousel-slide-image">
+            <xsl:if test="@id">
+                <xsl:attribute name="id" select="@id"/>
+            </xsl:if>
+            <xsl:if test="not(@alt) and @longdesc">
+                <xsl:attribute name="alt" select="@longdesc"/>
+            </xsl:if>
+        </img>
+        
     </xsl:template>
 
     <!-- Include debugging information in the output -->
