@@ -589,33 +589,33 @@
         <!-- Calculate suitable column spans for different screen sizes -->
         <!-- Bootstrap grid is 12 columns; xs = phone, sm = tablet, md = laptop, lg = desktop -->
         <xsl:variable name="colSpanClass">
-            <xsl:text>col-xs-12 </xsl:text>
+            <xsl:text>col-xs-12 </xsl:text> <!-- 1 card or tab per row on small screens -->
             <xsl:choose>
-            <xsl:when test="$tabRows = 2">
+            <xsl:when test="$tabRows = 2"> <!-- 2 cards or tabs per row on small screens -->
                 <xsl:text>col-sm-6</xsl:text>
             </xsl:when>
-            <xsl:when test="$tabRows = 3">
-                <xsl:text>col-sm-4</xsl:text>
+            <xsl:when test="$tabRows = 3"> <!-- 2 cards or tabs per row on small screens, 3 on medium -->
+                <xsl:text>col-sm-6 col-md-4</xsl:text>
             </xsl:when>
-            <xsl:when test="$tabRows = 4">
-                <xsl:text>col-sm-3</xsl:text>
+            <xsl:when test="$tabRows = 4"> <!-- 2 cards or tabs per row on small and medium -->
+                <xsl:text>col-sm-6</xsl:text>
             </xsl:when>
             <xsl:when test="$tabRows = 5">
-                <xsl:text>col-sm-2 col-sm-15</xsl:text>
+                <xsl:text>col-sm-6 col-md-3 col-lg-2</xsl:text>
             </xsl:when>
             <xsl:when test="$tabRows = 6">
-                <xsl:text>col-sm-2 col-md-4 col-lg-6</xsl:text>
+                <xsl:text>col-sm-6 col-md-3</xsl:text>
             </xsl:when>
             <xsl:otherwise>
-                <xsl:text>col-sm-2</xsl:text>
+                <xsl:text>col-sm-6 col-md-3</xsl:text>
             </xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
         <xsl:choose>
-        <xsl:when test="starts-with($tblRowClass, 'bsflipcard') and ($pluginname != 'qformat_wordtable')">
+        <xsl:when test="starts-with($tblHeadingClass, 'bsflipcard') and ($pluginname != 'qformat_wordtable')">
             <xsl:variable name="flipClass">
                 <xsl:choose>
-                <xsl:when test="$tblRowClass = 'bsflipcard'">
+                <xsl:when test="$tblHeadingClass = 'bsflipcard'">
                     <xsl:text>row flip-cards</xsl:text>
                 </xsl:when>
                 <xsl:otherwise> <!-- Numbered -->
@@ -626,17 +626,15 @@
 
             <div class="{$flipClass}">
                 <xsl:apply-templates select="x:tbody/x:tr" mode="BSFlipCard">
-                    <xsl:with-param name="nRows" select="$tabRows"/>
                     <xsl:with-param name="flipClass" select="$flipClass"/>
                     <xsl:with-param name="colSpanClass" select="$colSpanClass"/>
                 </xsl:apply-templates>
             </div>
         </xsl:when>
-        <xsl:when test="starts-with($tblRowClass, 'bstabhorz') and ($pluginname != 'qformat_wordtable')">
+        <xsl:when test="starts-with($tblHeadingClass, 'bstabhorz') and ($pluginname != 'qformat_wordtable')">
             <div class="tab tab-horz">
                 <ul class="row nav" role="tablist">
-                    <xsl:apply-templates select="x:tbody/x:tr/x:td[1]/x:p" mode="BSTabHorzList">
-                        <xsl:with-param name="nRows" select="$tabRows"/>
+                    <xsl:apply-templates select="x:tbody/x:tr/x:td[1]" mode="BSTabHorzList">
                         <xsl:with-param name="tblSeqNum" select="$tblSeqNum"/>
                         <xsl:with-param name="colSpanClass" select="$colSpanClass"/>
                     </xsl:apply-templates>
@@ -644,36 +642,37 @@
                 
                 <div class="tab-content">
                     <xsl:apply-templates select="x:tbody/x:tr/x:td[2]" mode="BSTabHorzContent">
-                        <xsl:with-param name="nRows" select="$tabRows"/>
                         <xsl:with-param name="tblSeqNum" select="$tblSeqNum"/>
                     </xsl:apply-templates>
                 </div>
             </div>
         </xsl:when>
-        <xsl:when test="starts-with($tblRowClass, 'bstabvert') and ($pluginname != 'qformat_wordtable')">
+        <xsl:when test="starts-with($tblHeadingClass, 'bstabvert') and ($pluginname != 'qformat_wordtable')">
             <div class="row tab tab-vert">
-                <!-- Use a 25/75 split for the column widths -->
+                <!-- Use a 30/70 split for the column widths -->
                 <div class="col-sm-3">
                     <!-- <xsl:comment><xsl:value-of select="concat('tabRows:', $tabRows, '; tblSeqNum: ', $tblSeqNum)"/></xsl:comment>-->
                     <ul class="nav" role="tablist">
-                        <xsl:apply-templates select="x:tbody/x:tr/x:td[1]/x:p" mode="BSTabVertList">
+                        <xsl:apply-templates select="x:tbody/x:tr/x:td[1]" mode="BSTabVertList">
+                        <xsl:with-param name="nRows" select="$tabRows"/>
                             <xsl:with-param name="tblSeqNum" select="$tblSeqNum"/>
                         </xsl:apply-templates>
                     </ul>
                 </div>
-                <div class="col-sm-9">
+                <div class="col-sm-7">
                     <div class="tab-content">
                         <xsl:apply-templates select="x:tbody/x:tr/x:td[2]" mode="BSTabVertContent">
+                        <xsl:with-param name="nRows" select="$tabRows"/>
                             <xsl:with-param name="tblSeqNum" select="$tblSeqNum"/>
                         </xsl:apply-templates>
                     </div>
                 </div>
             </div>
         </xsl:when>
-        <xsl:when test="starts-with($tblRowClass, 'bsaccordion') and ($pluginname != 'qformat_wordtable')">
+        <xsl:when test="starts-with($tblHeadingClass, 'bsaccordion') and ($pluginname != 'qformat_wordtable')">
             <xsl:variable name="accordionType">
                 <xsl:choose>
-                <xsl:when test="$tblRowClass = 'bsaccordionnumber'">
+                <xsl:when test="$tblHeadingClass = 'bsaccordionnumber'">
                     <xsl:text>accordion-num</xsl:text>
                 </xsl:when>
                 <xsl:otherwise> <!-- Numbered -->
@@ -911,8 +910,7 @@
         </div>
     </xsl:template>
 
-    <xsl:template match="x:p" mode="BSTabHorzList">
-        <xsl:param name="nRows"/>
+    <xsl:template match="x:td" mode="BSTabHorzList">
         <xsl:param name="tblSeqNum"/>
         <xsl:param name="colSpanClass"/>
         <!-- First item is active, the rest are not -->
@@ -924,13 +922,13 @@
         <xsl:variable name="listRefID" select="concat('htab', $tblSeqNum, '_', position())"/>
         <li class="{concat($colSpanClass, $activeFlag)}">
             <a href="{concat('#', $listRefID)}" aria-controls="{$listRefID}" role="tab" data-toggle="tab">
-                <xsl:apply-templates select="."/>
+                <xsl:value-of select="*"/>
+                <!--<xsl:apply-templates select="*"/>-->
             </a>
         </li>
     </xsl:template>
 
     <xsl:template match="x:td" mode="BSTabHorzContent">
-        <xsl:param name="nRows"/>
         <xsl:param name="tblSeqNum"/>
         <!-- First item is active, the rest are not -->
         <xsl:variable name="divClass">
@@ -941,20 +939,21 @@
         </xsl:variable>
         <xsl:variable name="divItemID" select="concat('htab', $tblSeqNum, '_', position())"/>
         <div id="{$divItemID}" class="{$divClass}" role="tabpanel">
-            <xsl:apply-templates select="."/>
+            <xsl:apply-templates select="*"/>
         </div>
     </xsl:template>
 
-    <xsl:template match="x:p" mode="BSTabVertList">
+    <xsl:template match="x:td" mode="BSTabVertList">
         <xsl:param name="tblSeqNum"/>
         <xsl:variable name="listRefID" select="concat('htab', $tblSeqNum, '_', position())"/>
         <li>
             <!-- First item is active, the rest are not -->
             <xsl:if test="position() = 1">
-                <xsl:attribute name="class" select="'active'"/>
+                <xsl:attribute name="class"><xsl:text>active</xsl:text></xsl:attribute>
             </xsl:if>
             <a href="{concat('#', $listRefID)}" aria-controls="{$listRefID}" role="tab" data-toggle="tab">
-                <xsl:apply-templates select="."/>
+                <xsl:value-of select="*"/>
+                <!--<xsl:apply-templates select="*"/>-->
             </a>
         </li>
     </xsl:template>
@@ -970,7 +969,7 @@
         </xsl:variable>
         <xsl:variable name="divItemID" select="concat('htab', $tblSeqNum, '_', position())"/>
         <div id="{$divItemID}" class="{$divClass}" role="tabpanel">
-            <xsl:apply-templates select="."/>
+            <xsl:apply-templates select="*"/>
         </div>
     </xsl:template>
 
@@ -989,7 +988,7 @@
 
         <!-- <xsl:comment><xsl:value-of select="concat('cellCount: ', $cellCount, '; class: ', $cellClass, '; cell: ', x:td[1]/x:p)"/></xsl:comment> -->
         <xsl:choose>
-        <xsl:when test="$cellCount = 1 and not(starts-with($cellClass, 'bsaccord'))">
+        <xsl:when test="$cellCount = 1 and not(starts-with($cellClass, 'bsaccordion'))">
             <!-- It's a content-only row, so ignore it, because it was handled by the previous row processing. -->
         </xsl:when>
         <xsl:otherwise>
