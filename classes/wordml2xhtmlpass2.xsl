@@ -688,6 +688,79 @@
                     </xsl:apply-templates>
             </div>
         </xsl:when>
+        <xsl:when test="starts-with($tblHeadingClass, 'bsjumbotron') and ($pluginname != 'qformat_wordtable')">
+            <div class="card card-graphic">
+               <div class="card-body">
+                  <div class="card-icon">
+                     <xsl:apply-templates select="x:tbody/x:tr[1]/x:td[1]/*"/>
+                  </div>
+                  <div class="card-text">
+                     <xsl:apply-templates select="x:tbody/x:tr[1]/x:td[2]/*"/>
+                  </div>
+               </div>
+            </div>
+        </xsl:when>
+        <xsl:when test="starts-with($tblHeadingClass, 'bsaudio') and ($pluginname != 'qformat_wordtable')">
+            <xsl:variable name="audioLink">
+                <xsl:value-of select="x:tbody/x:tr[1]/x:td[2]/descendant::x:a[1]/@href"/>
+            </xsl:variable>
+            <xsl:variable name="linkText" select="x:tbody/x:tr[1]/x:td[2]/x:p[1]"/>
+            <div class="well well-graphic">
+                <div class="well-icon hide-xs">
+                    <audio title="{$linkText}" controls="controls">
+                        <source src="{$audioLink}" type="audio/mp3"/>
+                    </audio>
+                </div>
+            </div>
+        </xsl:when>
+        <xsl:when test="starts-with($tblHeadingClass, 'bsvideo') and ($pluginname != 'qformat_wordtable')">
+            <xsl:variable name="videoLink">
+                <xsl:value-of select="x:tbody/x:tr[1]/x:td[2]//x:a[1]/@href"/>
+            </xsl:variable>
+            <xsl:variable name="fileSuffix" select="substring-after($videoLink, '.')"/>
+            <xsl:variable name="videoType">
+                <xsl:choose>
+                <xsl:when test="$fileSuffix = 'mpg'">
+                    <xsl:text>video/mpeg</xsl:text>
+                </xsl:when>
+                <xsl:when test="$fileSuffix = 'ogm' or $fileSuffix = 'ogv'">
+                    <xsl:text>video/ogg</xsl:text>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="concat('video/', $fileSuffix)"/>
+                </xsl:otherwise>
+                </xsl:choose>
+                <xsl:value-of select="concat('video/', $fileSuffix)"/>
+            </xsl:variable>
+            <xsl:variable name="linkText" select="x:tbody/x:tr[1]/x:td[2]/x:p[1]/*"/>
+
+            <div class="card">
+                <div class="col-xs-12 col-sm-offset-1 col-sm-10">
+                    <div class="video-wrapper card-img-top">
+                        <div class="embed-responsive embed-responsive-16by9 card-body">
+                            <div class="card-text">
+                                <xsl:choose>
+                                <xsl:when test="starts-with($videoLink, 'http')">
+                                    <!-- Use an iframe for 3rd-party videos -->
+                                    <iframe width="560" height="315" src="{$videoLink}" title="{$linkText}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                                        <xsl:comment>Force an iframe closing tag</xsl:comment>
+                                    </iframe>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <!-- Use the video element instead of iframe, to keep Lucimoo ePub export happier -->
+                                    <video src="{$videoLink}" type="{$videoType}" title="{$linkText}" class="embed-responsive-item" width="600" height="400" controls="controls">
+                                        <source src="{$videoLink}" type="{$videoType}" title="{$linkText}"/>
+                                        <xsl:comment><xsl:value-of select="concat('videoLink: ', $videoLink, '; fileSuffix: ', $fileSuffix)"/></xsl:comment>
+                                    </video>
+                                </xsl:otherwise>
+                                </xsl:choose>
+                            
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xsl:when>
         <!-- Brightspace (not Bootstrap) CreatorPlus Carousel -->
         <xsl:when test="starts-with($tblHeadingClass, 'bscarousel') and ($pluginname != 'qformat_wordtable')">
             <div class="d2l-element" role="section">
