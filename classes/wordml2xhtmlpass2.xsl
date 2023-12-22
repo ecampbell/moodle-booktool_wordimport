@@ -337,7 +337,10 @@
         </xsl:when>
         <xsl:otherwise>
             <xsl:element name="{$heading_tag}">
-                <xsl:apply-templates select="node()"/>
+                <xsl:attribute name="id">
+                    <xsl:value-of select="concat('h', position())"/>
+                </xsl:attribute>
+                <xsl:apply-templates/>
             </xsl:element>
         </xsl:otherwise>
         </xsl:choose>
@@ -742,7 +745,7 @@
                                 <xsl:choose>
                                 <xsl:when test="starts-with($videoLink, 'http')">
                                     <!-- Use an iframe for 3rd-party videos -->
-                                    <iframe width="560" height="315" src="{$videoLink}" title="{$linkText}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                                    <iframe width="560" height="315" src="{$videoLink}" title="{$linkText}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen="allowfullscreen">
                                         <xsl:comment>Force an iframe closing tag</xsl:comment>
                                     </iframe>
                                 </xsl:when>
@@ -787,7 +790,12 @@
         </xsl:when>
         <xsl:otherwise>
             <table>
-                <xsl:apply-templates select="@*"/>
+                <!-- Use Bootstrap table class and set it to stripe alternate rows -->
+                <xsl:attribute name="class">
+                    <xsl:text>table table-striped</xsl:text>
+                </xsl:attribute>
+                <!-- Copy other attributes except for class -->
+                <xsl:apply-templates select="@*[local-name() != 'class']"/>
 
                 <!-- Check if a table has a title in the previous paragraph-->
                 <xsl:if test="preceding-sibling::x:p[1]/@class = 'tabletitle'">
@@ -800,6 +808,18 @@
             </table>
         </xsl:otherwise>
         </xsl:choose>
+    </xsl:template>
+
+    <!-- Use Bootstrap dark table heading -->
+    <xsl:template match="x:thead">
+        <thead>
+            <xsl:attribute name="class">
+                <xsl:text>thead-dark</xsl:text>
+            </xsl:attribute>
+            <!-- Dump any class attribute already present -->
+            <xsl:apply-templates select="@*[local-name() != 'class']"/>
+            <xsl:apply-templates/>
+        </thead>
     </xsl:template>
 
     <!-- Omit table titles, since they are included in the table itself-->
@@ -1068,8 +1088,11 @@
             <div class="panel panel-default">
                 <div class="{$divClass}" role="tab">
                     <!-- Use h6 because it will be promoted by the export ePub utility to h4 -->
-                    <h6 class="panel-title">
-                        <a href="" role="button" data-toggle="collapse" aria-expanded="false"><xsl:apply-templates select="x:td[1]/*"/></a>
+                    <xsl:variable name="tableCount" select="count(preceding::x:table)"/>
+                    <h6 class="panel-title" id="{concat('acc', $tableCount, '_', position())}">
+                        <a href="" role="button" data-toggle="collapse" aria-expanded="false">
+                            <xsl:apply-templates select="x:td[1]/x:p[1]" mode="BSAccordionContent"/>
+                        </a>
                     </h6>
                 </div>
                 <div class="panel-collapse collapse" role="tabpanel">
@@ -1090,6 +1113,10 @@
         </xsl:choose>
     </xsl:template>
 
+    <!-- Strip heading style from accordion heading, but keep character level markup -->
+    <xsl:template match="x:p" mode="BSAccordionContent">
+        <xsl:apply-templates/>
+    </xsl:template>
     <!-- Brightspace CreatorPlus Carousel -->
     <xsl:template match="x:tr" mode="BSCarousel">
         <xsl:variable name="posIndex" select="position() - 1"/>

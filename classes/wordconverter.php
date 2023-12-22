@@ -319,10 +319,10 @@ class wordconverter {
         $htmlelement = '<html xmlns="http://www.w3.org/1999/xhtml" ' .
             'xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math">';
         // Grab title and contents of each 'Heading 1' section, which is mapped to h3.
-        $chaptermatches = preg_split('#<h3>.*</h3>#isU', $htmlcontent);
+        $chaptermatches = preg_split('#<h3([^>]*?)>.*</h3>#isU', $htmlcontent);
         $langmatches = array();
         preg_match('#<meta name="moodleLanguage" content="(.*)"/>#i', $htmlcontent, $langmatches);
-        preg_match_all('#<h3>(.*)</h3>#i', $htmlcontent, $h3matches);
+        preg_match_all('#<h3([^>]*?)>(.*)</h3>#i', $htmlcontent, $h3matches);
 
         // If no h3 elements are present, treat the whole file as a single chapter.
         if (count($chaptermatches) == 1) {
@@ -332,7 +332,7 @@ class wordconverter {
         // Create a separate HTML file in the Zip file for each section of content.
         for ($i = 1; $i < count($chaptermatches); $i++) {
             // Remove any tags from heading, as it prevents proper import of the chapter title.
-            $chaptitle = strip_tags($h3matches[1][$i - 1]);
+            $chaptitle = strip_tags($h3matches[2][$i - 1]);
             $chapcontent = $chaptermatches[$i];
             $chapfilename = sprintf("index%02d.htm", $i);
 
