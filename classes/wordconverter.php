@@ -55,8 +55,9 @@ class wordconverter {
      * Class constructor
      *
      * @param string $plugin Name of plugin module
+     * @param string $convertformat Bootstrap, Daylight (Brightspace), or none
      */
-    public function __construct(string $plugin = 'booktool_wordimport') {
+    public function __construct(string $plugin = 'booktool_wordimport', string $convertformat = 'convert2bootstrap') {
         global $CFG, $USER, $COURSE;
 
         // Set common parameters for all XSLT transformations. Note that the XSLT processor doesn't support $arguments.
@@ -74,6 +75,7 @@ class wordconverter {
             'imagehandling' => 'referenced', // Atto, Books and Lessons are referenced, Glossaries and Question are embedded.
             'heading1stylelevel' => 3, // Atto, Books and Lessons are 3, Glossaries and Question banks should be overridden to 1.
             'pluginname' => $plugin,
+            'convertformat' => $convertformat,
             'debug_flag' => (debugging(null, DEBUG_DEVELOPER)) ? '1' : '0'
             );
     }
@@ -124,9 +126,10 @@ class wordconverter {
      * @param string $filename Word file
      * @param array $imagesforzipping array to store embedded image files
      * @param bool $convertgifs Convert GIF images to PNG.
+     * @param string $convertformat Bootstrap, Daylight (Brightspace), or none
      * @return string XHTML content extracted from Word file and split into files
      */
-    public function import(string $filename, array &$imagesforzipping, bool $convertgifs = false) {
+    public function import(string $filename, array &$imagesforzipping, bool $convertgifs = false, string $convertformat = 'convert2bootstrap') {
         global $CFG;
 
         // Check that we can unzip the Word .docx file into its component files.

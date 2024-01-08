@@ -70,6 +70,10 @@ if ($mform->is_cancelled()) {
     // Should the Word file split into subchapters on 'Heading 2' styles?
     $splitonsubheadings = property_exists($data, 'splitonsubheadings');
 
+    // Should the Word file convert certain tables into Bootstrap components?
+    $convertformatflag = property_exists($data, 'convertformat');
+    $convertformat = ($convertformatflag)? 'convert2bootstrap': 'convert2daylight';
+
     // Get the uploaded Word file and save it to the file system.
     $fs = get_file_storage();
     $draftid = file_get_submitted_draft_itemid('importfile');
@@ -85,7 +89,7 @@ if ($mform->is_cancelled()) {
     }
 
     // Convert the Word file content and import it into the book.
-    booktool_wordimport_import($tmpfilename, $book, $context, $splitonsubheadings, $verbose);
+    booktool_wordimport_import($tmpfilename, $book, $context, $splitonsubheadings, $verbose, $convertformat);
 
     echo $OUTPUT->continue_button(new moodle_url('/mod/book/view.php', array('id' => $id)));
     echo $OUTPUT->footer();

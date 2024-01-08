@@ -25,6 +25,12 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['cannotopentempfile'] = 'Cannot open temporary file <b>{$a}</b>';
+$string['convert2bootstrap4'] = 'Convert to Bootstrap components';
+$string['convert2bootstrap5'] = 'Bootstrap 5';
+$string['convert2daylight'] = 'Convert to Daylight (Brightspace)';
+$string['convert2none'] = 'None';
+$string['convertformat'] = 'Conversion type';
+$string['convertformat_help'] = 'Choose how to convert certain Word table structures (into Bootstrap components by default). Uncheck to convert to Daylight Dynamic elements (Brightspace)';
 $string['embeddedimageswarning'] = 'Warning: this file must be opened using Word 2020 or Word 365 in order to handle embedded images correctly.';
 $string['encodedimageswarning'] = 'Warning: this file contains encoded images. See <a href="http://www.moodle2word.net/mod/page/view.php?id=143">more information on how to convert them back into embedded images</a>.';
 $string['exportbook'] = 'Export book to Microsoft Word';

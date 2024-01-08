@@ -40,15 +40,16 @@ use \booktool_wordimport\wordconverter;
  * @param context_module $context
  * @param bool $splitonsubheadings Split book into chapters and subchapters
  * @param bool $verbose Print extra progress messages
+ * @param string $convertformat Bootstrap, Daylight (Brightspace), or none
  * @return void
  */
 function booktool_wordimport_import(string $wordfilename, stdClass $book, context_module $context,
-                bool $splitonsubheadings = false, bool $verbose = false) {
+                bool $splitonsubheadings = false, bool $verbose = false, string $convertformat = 'convert2bootstrap') {
     global $CFG;
 
     // Convert the Word file content into XHTML and an array of images.
     $imagesforzipping = array();
-    $word2xml = new wordconverter();
+    $word2xml = new wordconverter('booktool_wordimport', $convertformat);
     $htmlcontent = $word2xml->import($wordfilename, $imagesforzipping);
 
     // Store images in a Zip file and split the HTML file into sections.

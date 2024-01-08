@@ -55,6 +55,11 @@ class booktool_wordimport_form extends moodleform {
         $mform->addHelpButton('splitonsubheadings', 'splitonsubheadings', 'booktool_wordimport');
         $mform->setDefault('splitonsubheadings', 0);
 
+        // Convert format: Bootstrap or Dynamic Elements (Brightspace).
+        $mform->addElement('checkbox', 'convertformat', '', get_string('convert2bootstrap4', 'booktool_wordimport'));
+        $mform->addHelpButton('convertformat', 'convertformat', 'booktool_wordimport');
+        $mform->setDefault('convertformat', 1);
+
         // User can select 1 and only 1 Word file which must have a .docx suffix (not .docm or .doc).
         $mform->addElement('filepicker', 'importfile', get_string('wordfile', 'booktool_wordimport'), null,
                            array('subdirs' => 0, 'accepted_types' => array('.docx')));

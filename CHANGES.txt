@@ -1,6 +1,7 @@
 # Change log
 
 Date          Version   Comment
+2024/01/08    1.4.13    Add support for selecting transformation type, and add Bootstrap Accordion.
 2023/12/22    1.4.13    Add support for formatted tables, heading IDs, etc.
 2023/12/21    1.4.13    Add support for video and audio links.
 2023/12/15    1.4.13    Support D2L constructs for tab groups, collapsibles, carousel, etc.

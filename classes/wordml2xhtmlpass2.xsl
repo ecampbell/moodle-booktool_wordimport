@@ -37,6 +37,7 @@
 
     <xsl:param name="debug_flag" select="0"/>
     <xsl:param name="pluginname"/>
+    <xsl:param name="convertformat" select="'convert2bootstrap'"/>
     <xsl:param name="imagehandling"/>
     <xsl:param name="course_id"/>
     <xsl:param name="heading1stylelevel"/> <!-- Should be 1 for Glossaries and Questions, 3 for Books, Lessons and Atto -->
@@ -615,7 +616,23 @@
             </xsl:choose>
         </xsl:variable>
         <xsl:choose>
-        <xsl:when test="starts-with($tblHeadingClass, 'bsflipcard') and ($pluginname != 'qformat_wordtable')">
+        <xsl:when test="starts-with($tblHeadingClass, 'bstabhorz') and ($convertformat = 'convert2bootstrap4')">
+            <div class="tab tab-horz">
+                <ul class="row nav" role="tablist">
+                    <xsl:apply-templates select="x:tbody/x:tr/x:td[1]" mode="BSTabHorzList">
+                        <xsl:with-param name="tblSeqNum" select="$tblSeqNum"/>
+                        <xsl:with-param name="colSpanClass" select="$colSpanClass"/>
+                    </xsl:apply-templates>
+                </ul>
+                
+                <div class="tab-content">
+                    <xsl:apply-templates select="x:tbody/x:tr/x:td[2]" mode="BSTabHorzContent">
+                        <xsl:with-param name="tblSeqNum" select="$tblSeqNum"/>
+                    </xsl:apply-templates>
+                </div>
+            </div>
+        </xsl:when>
+        <xsl:when test="starts-with($tblHeadingClass, 'bsflipcard') and ($convertformat = 'convert2daylight')">
             <xsl:variable name="flipClass">
                 <xsl:choose>
                 <xsl:when test="$tblHeadingClass = 'bsflipcard'">
@@ -634,7 +651,7 @@
                 </xsl:apply-templates>
             </div>
         </xsl:when>
-        <xsl:when test="starts-with($tblHeadingClass, 'bstabhorz') and ($pluginname != 'qformat_wordtable')">
+        <xsl:when test="starts-with($tblHeadingClass, 'bstabhorz') and ($convertformat = 'convert2daylight')">
             <div class="tab tab-horz">
                 <ul class="row nav" role="tablist">
                     <xsl:apply-templates select="x:tbody/x:tr/x:td[1]" mode="BSTabHorzList">
@@ -650,7 +667,7 @@
                 </div>
             </div>
         </xsl:when>
-        <xsl:when test="starts-with($tblHeadingClass, 'bstabvert') and ($pluginname != 'qformat_wordtable')">
+        <xsl:when test="starts-with($tblHeadingClass, 'bstabvert') and ($convertformat = 'convert2daylight')">
             <div class="row tab tab-vert">
                 <!-- Use a 30/70 split for the column widths -->
                 <div class="col-sm-3">
@@ -672,7 +689,16 @@
                 </div>
             </div>
         </xsl:when>
-        <xsl:when test="starts-with($tblHeadingClass, 'bsaccordion') and ($pluginname != 'qformat_wordtable')">
+        <xsl:when test="starts-with($tblHeadingClass, 'bsaccordion') and ($convertformat = 'convert2bootstrap')">
+            <xsl:variable name="accordionName" select="concat('accordion', count(preceding::x:table))"/> 
+
+            <div class="accordion" id="{$accordionName}">
+                <xsl:apply-templates select="x:tbody/x:tr" mode="BSAccordionContent">
+                    <xsl:with-param name="accordionName" select="$accordionName"/>
+                </xsl:apply-templates>
+            </div>
+        </xsl:when>
+        <xsl:when test="starts-with($tblHeadingClass, 'bsaccordion') and ($convertformat = 'convert2daylight')">
             <xsl:variable name="accordionType">
                 <xsl:choose>
                 <xsl:when test="$tblHeadingClass = 'bsaccordionnumber'">
@@ -686,12 +712,12 @@
             <xsl:variable name="accordionClass" select="concat('panel-group accordion ', $accordionType)"/> 
 
             <div class="{$accordionClass}" role="tablist" aria-muliselectable="true">
-                    <xsl:apply-templates select="x:tbody/x:tr" mode="BSAccordionContent">
+                    <xsl:apply-templates select="x:tbody/x:tr" mode="DLAccordionContent">
                         <xsl:with-param name="accordionType" select="$accordionType"/>
                     </xsl:apply-templates>
             </div>
         </xsl:when>
-        <xsl:when test="starts-with($tblHeadingClass, 'bsjumbotron') and ($pluginname != 'qformat_wordtable')">
+        <xsl:when test="starts-with($tblHeadingClass, 'bsjumbotron') and ($convertformat = 'convert2daylight')">
             <div class="card card-graphic">
                <div class="card-body">
                   <div class="card-icon">
@@ -703,7 +729,7 @@
                </div>
             </div>
         </xsl:when>
-        <xsl:when test="starts-with($tblHeadingClass, 'bsaudio') and ($pluginname != 'qformat_wordtable')">
+        <xsl:when test="starts-with($tblHeadingClass, 'bsaudio') and ($convertformat = 'convert2daylight')">
             <xsl:variable name="audioLink">
                 <xsl:value-of select="x:tbody/x:tr[1]/x:td[2]/descendant::x:a[1]/@href"/>
             </xsl:variable>
@@ -716,7 +742,7 @@
                 </div>
             </div>
         </xsl:when>
-        <xsl:when test="starts-with($tblHeadingClass, 'bsvideo') and ($pluginname != 'qformat_wordtable')">
+        <xsl:when test="starts-with($tblHeadingClass, 'bsvideo') and ($convertformat = 'convert2daylight')">
             <xsl:variable name="videoLink">
                 <xsl:value-of select="x:tbody/x:tr[1]/x:td[2]//x:a[1]/@href"/>
             </xsl:variable>
@@ -765,7 +791,7 @@
             </div>
         </xsl:when>
         <!-- Brightspace (not Bootstrap) CreatorPlus Carousel -->
-        <xsl:when test="starts-with($tblHeadingClass, 'bscarousel') and ($pluginname != 'qformat_wordtable')">
+        <xsl:when test="starts-with($tblHeadingClass, 'bscarousel') and ($convertformat = 'convert2daylight')">
             <div class="d2l-element" role="section">
                 <!-- Note: the div/@instruction element must be present! -->
                 <div class="instruction" data-prop="0|null">Click the arrow links to progress through slides.</div>
@@ -778,7 +804,7 @@
                 </div>
             </div>
         </xsl:when>
-        <xsl:when test="starts-with($tblHeadingClass, 'heading') and ($pluginname != 'qformat_wordtable')">
+        <xsl:when test="starts-with($tblHeadingClass, 'heading') and ($convertformat = 'convert2daylight')">
             <div class="{concat('panel ', $panelType)}">
                 <div class="panel-heading">
                     <xsl:apply-templates select="x:thead/x:tr[1]/x:th[1]/x:p"/>
@@ -1066,9 +1092,53 @@
         </div>
     </xsl:template>
 
-    <!-- Bootstrap Accordion: unnumbered or numbered -->
+    <!-- Bootstrap Accordion: unnumbered -->
     <!-- See https://getbootstrap.com/docs/4.1/components/collapse/#accordion-example -->
     <xsl:template match="x:tr" mode="BSAccordionContent">
+        <xsl:param name="accordionName"/>
+        <xsl:variable name="cellCount" select="count(x:td)"/>
+        <xsl:variable name="cellClass" select="x:td[1]/x:p[1]/@class"/>
+
+        <!-- <xsl:comment><xsl:value-of select="concat('cellCount: ', $cellCount, '; class: ', $cellClass, '; cell: ', x:td[1]/x:p)"/></xsl:comment> -->
+        <xsl:choose>
+        <xsl:when test="$cellCount = 1 and not(starts-with($cellClass, 'bsaccordion'))">
+            <!-- It's a content-only row, so ignore it, because it was handled by the previous row processing. -->
+        </xsl:when>
+        <xsl:otherwise>
+            <xsl:variable name="targetLabel" select="concat('accLabel', count(preceding::x:table), '_', position())"/>
+            <xsl:variable name="targetCard" select="concat('accCard', count(preceding::x:table), '_', position())"/>
+            <xsl:text>&#10;</xsl:text>
+            <div class="card">
+                <xsl:text>&#10;</xsl:text>
+                <div class="card-header" id="{$targetLabel}">
+                    <!-- Use h4 as a default for the moment -->
+                    <h4 class="mb-0">
+                         <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="{concat('#', $targetCard)}" aria-expanded="false" aria-controls="{$targetCard}">
+                            <xsl:apply-templates select="x:td[1]/x:p[1]" mode="BSAccordionContent"/>
+                        </button>
+                    </h4>
+                </div>
+                <xsl:text>&#10;</xsl:text>
+                <div id="{$targetCard}" aria-labelledby="{$targetLabel}" data-parent="{concat('#', $accordionName)}" class="collapse">
+                    <div class="card-body">
+                        <!-- If a single-column table, reach for the next row, otherwise use column 2 -->
+                        <xsl:choose>
+                        <xsl:when test="$cellCount = 1">
+                            <xsl:apply-templates select="following-sibling::x:tr[1]/x:td[1]/*"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:apply-templates select="x:td[2]/*"/>
+                        </xsl:otherwise>
+                        </xsl:choose>
+                    </div>
+                </div>
+            </div>
+        </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+    <!-- Daylight Accordion: unnumbered or numbered -->
+    <xsl:template match="x:tr" mode="DLAccordionContent">
         <xsl:param name="accordionType"/>
         <xsl:variable name="cellCount" select="count(x:td)"/>
         <xsl:variable name="cellClass" select="x:td[1]/x:p[1]/@class"/>
@@ -1117,6 +1187,7 @@
     <xsl:template match="x:p" mode="BSAccordionContent">
         <xsl:apply-templates/>
     </xsl:template>
+
     <!-- Brightspace CreatorPlus Carousel -->
     <xsl:template match="x:tr" mode="BSCarousel">
         <xsl:variable name="posIndex" select="position() - 1"/>
