@@ -616,23 +616,7 @@
             </xsl:choose>
         </xsl:variable>
         <xsl:choose>
-        <xsl:when test="starts-with($tblHeadingClass, 'bstabhorz') and ($convertformat = 'convert2bootstrap4')">
-            <div class="tab tab-horz">
-                <ul class="row nav" role="tablist">
-                    <xsl:apply-templates select="x:tbody/x:tr/x:td[1]" mode="BSTabHorzList">
-                        <xsl:with-param name="tblSeqNum" select="$tblSeqNum"/>
-                        <xsl:with-param name="colSpanClass" select="$colSpanClass"/>
-                    </xsl:apply-templates>
-                </ul>
-                
-                <div class="tab-content">
-                    <xsl:apply-templates select="x:tbody/x:tr/x:td[2]" mode="BSTabHorzContent">
-                        <xsl:with-param name="tblSeqNum" select="$tblSeqNum"/>
-                    </xsl:apply-templates>
-                </div>
-            </div>
-        </xsl:when>
-        <xsl:when test="starts-with($tblHeadingClass, 'bsflipcard') and ($convertformat = 'convert2daylight')">
+        <xsl:when test="starts-with($tblHeadingClass, 'bsflipcard') and ($convertformat = 'convert2daylight' or $convertformat = 'convert2bootstrap')">
             <xsl:variable name="flipClass">
                 <xsl:choose>
                 <xsl:when test="$tblHeadingClass = 'bsflipcard'">
@@ -651,17 +635,54 @@
                 </xsl:apply-templates>
             </div>
         </xsl:when>
+        <xsl:when test="starts-with($tblHeadingClass, 'bstabhorz') and ($convertformat = 'convert2bootstrap')">
+            <!-- See https://getbootstrap.com/docs/4.6/components/navs/#javascript-behavior (Pills) -->
+            <ul class="nav nav-pills nav-fill" role="tablist">
+                <xsl:apply-templates select="x:tbody/x:tr/x:td[1]" mode="BSTabHorzList">
+                    <xsl:with-param name="tblSeqNum" select="$tblSeqNum"/>
+                </xsl:apply-templates>
+            </ul>
+            
+            <div class="tab-content">
+                <xsl:apply-templates select="x:tbody/x:tr/x:td[2]" mode="BSTabHorzContent">
+                    <xsl:with-param name="tblSeqNum" select="$tblSeqNum"/>
+                </xsl:apply-templates>
+            </div>
+        </xsl:when>
+        <xsl:when test="starts-with($tblHeadingClass, 'bstabvert') and ($convertformat = 'convert2bootstrap')">
+            <!-- See https://getbootstrap.com/docs/4.6/components/navs/#javascript-behavior (Pills) -->
+            <div class="row">
+                <!-- Use a 30/70 split for the column widths -->
+                <div class="col-3">
+                    <!-- <xsl:comment><xsl:value-of select="concat('tabRows:', $tabRows, '; tblSeqNum: ', $tblSeqNum)"/></xsl:comment>-->
+                    <div class="nav flex-column nav-pills" id="{concat('vtab', $tblSeqNum)}" role="tablist" aria-orientation="vertical">
+                        <xsl:apply-templates select="x:tbody/x:tr/x:td[1]" mode="BSTabVertList">
+                        <xsl:with-param name="nRows" select="$tabRows"/>
+                            <xsl:with-param name="tblSeqNum" select="$tblSeqNum"/>
+                        </xsl:apply-templates>
+                    </div>
+                </div>
+                <div class="col-7">
+                    <div class="tab-content">
+                        <xsl:apply-templates select="x:tbody/x:tr/x:td[2]" mode="BSTabVertContent">
+                        <xsl:with-param name="nRows" select="$tabRows"/>
+                            <xsl:with-param name="tblSeqNum" select="$tblSeqNum"/>
+                        </xsl:apply-templates>
+                    </div>
+                </div>
+            </div>
+        </xsl:when>
         <xsl:when test="starts-with($tblHeadingClass, 'bstabhorz') and ($convertformat = 'convert2daylight')">
             <div class="tab tab-horz">
                 <ul class="row nav" role="tablist">
-                    <xsl:apply-templates select="x:tbody/x:tr/x:td[1]" mode="BSTabHorzList">
+                    <xsl:apply-templates select="x:tbody/x:tr/x:td[1]" mode="DLTabHorzList">
                         <xsl:with-param name="tblSeqNum" select="$tblSeqNum"/>
                         <xsl:with-param name="colSpanClass" select="$colSpanClass"/>
                     </xsl:apply-templates>
                 </ul>
                 
                 <div class="tab-content">
-                    <xsl:apply-templates select="x:tbody/x:tr/x:td[2]" mode="BSTabHorzContent">
+                    <xsl:apply-templates select="x:tbody/x:tr/x:td[2]" mode="DLTabHorzContent">
                         <xsl:with-param name="tblSeqNum" select="$tblSeqNum"/>
                     </xsl:apply-templates>
                 </div>
@@ -673,7 +694,7 @@
                 <div class="col-sm-3">
                     <!-- <xsl:comment><xsl:value-of select="concat('tabRows:', $tabRows, '; tblSeqNum: ', $tblSeqNum)"/></xsl:comment>-->
                     <ul class="nav" role="tablist">
-                        <xsl:apply-templates select="x:tbody/x:tr/x:td[1]" mode="BSTabVertList">
+                        <xsl:apply-templates select="x:tbody/x:tr/x:td[1]" mode="DLTabVertList">
                         <xsl:with-param name="nRows" select="$tabRows"/>
                             <xsl:with-param name="tblSeqNum" select="$tblSeqNum"/>
                         </xsl:apply-templates>
@@ -681,7 +702,7 @@
                 </div>
                 <div class="col-sm-7">
                     <div class="tab-content">
-                        <xsl:apply-templates select="x:tbody/x:tr/x:td[2]" mode="BSTabVertContent">
+                        <xsl:apply-templates select="x:tbody/x:tr/x:td[2]" mode="DLTabVertContent">
                         <xsl:with-param name="nRows" select="$tabRows"/>
                             <xsl:with-param name="tblSeqNum" select="$tblSeqNum"/>
                         </xsl:apply-templates>
@@ -1029,7 +1050,47 @@
         </div>
     </xsl:template>
 
+    <!-- Bootstrap: Horizontal tab list -->
     <xsl:template match="x:td" mode="BSTabHorzList">
+        <xsl:param name="tblSeqNum"/>
+        <!-- First item is active, the rest are not -->
+        <xsl:variable name="activeFlag">
+            <xsl:choose>
+            <xsl:when test="position() = 1">
+                <xsl:text>true</xsl:text>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:text>false</xsl:text>
+            </xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+        <xsl:variable name="listRefID" select="concat('htab', $tblSeqNum, '_', position())"/>
+        <li class="nav-item" role="presentation">
+            <button data-target="{concat('#', $listRefID)}" aria-controls="{$listRefID}" id="{concat('hd', $listRefID)}" aria-selected="{$activeFlag}" role="tab" data-toggle="tab">
+                <xsl:value-of select="*"/>
+                <!--<xsl:apply-templates select="*"/>-->
+            </button>
+        </li>
+    </xsl:template>
+
+    <!-- Bootstrap: Horizontal tab content -->
+    <xsl:template match="x:td" mode="BSTabHorzContent">
+        <xsl:param name="tblSeqNum"/>
+        <!-- First item is active, the rest are not -->
+        <xsl:variable name="divClass">
+            <xsl:text>tab-pane fade</xsl:text>
+            <xsl:if test="position() = 1">
+                <xsl:text> show active</xsl:text>
+            </xsl:if>
+        </xsl:variable>
+        <xsl:variable name="listRefID" select="concat('htab', $tblSeqNum, '_', position())"/>
+        <div id="{$listRefID}" aria-labelled-by="{concat('hd', $listRefID)}" class="{$divClass}" role="tabpanel">
+            <xsl:apply-templates select="*"/>
+        </div>
+    </xsl:template>
+
+    <!-- Daylight: Horizontal tab list -->
+    <xsl:template match="x:td" mode="DLTabHorzList">
         <xsl:param name="tblSeqNum"/>
         <xsl:param name="colSpanClass"/>
         <!-- First item is active, the rest are not -->
@@ -1047,7 +1108,8 @@
         </li>
     </xsl:template>
 
-    <xsl:template match="x:td" mode="BSTabHorzContent">
+    <!-- Daylight: Horizontal tab content -->
+    <xsl:template match="x:td" mode="DLTabHorzContent">
         <xsl:param name="tblSeqNum"/>
         <!-- First item is active, the rest are not -->
         <xsl:variable name="divClass">
@@ -1056,15 +1118,60 @@
                 <xsl:text> in active</xsl:text>
             </xsl:if>
         </xsl:variable>
-        <xsl:variable name="divItemID" select="concat('htab', $tblSeqNum, '_', position())"/>
-        <div id="{$divItemID}" class="{$divClass}" role="tabpanel">
+        <xsl:variable name="listRefID" select="concat('htab', $tblSeqNum, '_', position())"/>
+        <div id="{$listRefID}" class="{$divClass}" role="tabpanel">
             <xsl:apply-templates select="*"/>
         </div>
     </xsl:template>
 
+    <!-- Bootstrap: Vertical tab list -->
+    <!-- See https://getbootstrap.com/docs/4.6/components/navs/#javascript-behavior (Pills) -->
     <xsl:template match="x:td" mode="BSTabVertList">
         <xsl:param name="tblSeqNum"/>
-        <xsl:variable name="listRefID" select="concat('htab', $tblSeqNum, '_', position())"/>
+        <xsl:variable name="listRefID" select="concat('vtab', $tblSeqNum, '_', position())"/>
+            <!-- First item is active, the rest are not -->
+        <xsl:variable name="buttonClass">
+            <xsl:text>nav-link</xsl:text>
+            <xsl:if test="position() = 1">
+                <xsl:text> active</xsl:text>
+            </xsl:if>
+        </xsl:variable>
+        <xsl:variable name="activeFlag">
+            <xsl:choose>
+            <xsl:when test="position() = 1">
+                <xsl:text>true</xsl:text>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:text>false</xsl:text>
+            </xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+        <button class="{$buttonClass}" id="{concat('hd', $listRefID)}" data-target="{concat('#', $listRefID)}" aria-controls="{$listRefID}" aria-selected="{$activeFlag}" type="button" role="tab" data-toggle="pill">
+            <xsl:value-of select="*"/>
+        </button>
+    </xsl:template>
+
+    <!-- Bootstrap: Vertical tab content -->
+    <!-- See https://getbootstrap.com/docs/4.6/components/navs/#javascript-behavior (Pills) -->
+    <xsl:template match="x:td" mode="BSTabVertContent">
+        <xsl:param name="tblSeqNum"/>
+        <!-- First item is active, the rest are not -->
+        <xsl:variable name="divClass">
+            <xsl:text>tab-pane fade</xsl:text>
+            <xsl:if test="position() = 1">
+                <xsl:text> show active</xsl:text>
+            </xsl:if>
+        </xsl:variable>
+        <xsl:variable name="listRefID" select="concat('vtab', $tblSeqNum, '_', position())"/>
+        <div id="{$listRefID}" class="{$divClass}" aria-labelledby="{concat('hd', $listRefID)}" role="tabpanel">
+            <xsl:apply-templates select="*"/>
+        </div>
+    </xsl:template>
+
+    <!-- Daylight: Vertical tab list -->
+    <xsl:template match="x:td" mode="DLTabVertList">
+        <xsl:param name="tblSeqNum"/>
+        <xsl:variable name="listRefID" select="concat('vtab', $tblSeqNum, '_', position())"/>
         <li>
             <!-- First item is active, the rest are not -->
             <xsl:if test="position() = 1">
@@ -1077,7 +1184,8 @@
         </li>
     </xsl:template>
 
-    <xsl:template match="x:td" mode="BSTabVertContent">
+    <!-- Daylight: Vertical tab content -->
+    <xsl:template match="x:td" mode="DLTabVertContent">
         <xsl:param name="tblSeqNum"/>
         <!-- First item is active, the rest are not -->
         <xsl:variable name="divClass">
@@ -1086,8 +1194,8 @@
                 <xsl:text> in active</xsl:text>
             </xsl:if>
         </xsl:variable>
-        <xsl:variable name="divItemID" select="concat('htab', $tblSeqNum, '_', position())"/>
-        <div id="{$divItemID}" class="{$divClass}" role="tabpanel">
+        <xsl:variable name="listRefID" select="concat('vtab', $tblSeqNum, '_', position())"/>
+        <div id="{$listRefID}" class="{$divClass}" role="tabpanel">
             <xsl:apply-templates select="*"/>
         </div>
     </xsl:template>
