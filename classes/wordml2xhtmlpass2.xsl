@@ -35,7 +35,7 @@
     <xsl:output method="xml" encoding="UTF-8" indent="no" omit-xml-declaration="yes"/>
     <xsl:preserve-space elements="x:span x:p"/>
 
-    <xsl:param name="debug_flag" select="0"/>
+    <xsl:param name="debug_flag" select="1"/>
     <xsl:param name="pluginname"/>
     <xsl:param name="convertformat" select="'convert2bootstrap'"/>
     <xsl:param name="imagehandling"/>
@@ -632,6 +632,7 @@
                 <xsl:apply-templates select="x:tbody/x:tr" mode="BSFlipCard">
                     <xsl:with-param name="flipClass" select="$flipClass"/>
                     <xsl:with-param name="colSpanClass" select="$colSpanClass"/>
+                    <xsl:with-param name="tblHeadingClass" select="$tblHeadingClass"/>
                 </xsl:apply-templates>
             </div>
         </xsl:when>
@@ -710,22 +711,36 @@
                 </div>
             </div>
         </xsl:when>
+        <!-- Bootstrap Accordion, cf. https://getbootstrap.com/docs/4.6/components/collapse/#accordion-example) -->
         <xsl:when test="starts-with($tblHeadingClass, 'bsaccordion') and ($convertformat = 'convert2bootstrap')">
             <xsl:variable name="accordionName" select="concat('accordion', count(preceding::x:table))"/> 
+            <xsl:variable name="accordionType">
+                <xsl:choose>
+                <xsl:when test="$tblHeadingClass = 'bsaccordionnumber'">
+                    <xsl:text>numbered</xsl:text>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:text>unnumbered</xsl:text>
+                </xsl:otherwise>
+                </xsl:choose>
+            </xsl:variable>
 
             <div class="accordion" id="{$accordionName}">
                 <xsl:apply-templates select="x:tbody/x:tr" mode="BSAccordionContent">
                     <xsl:with-param name="accordionName" select="$accordionName"/>
+                    <xsl:with-param name="accordionType" select="$accordionType"/>
                 </xsl:apply-templates>
             </div>
         </xsl:when>
+        <!-- Brightspace Daylight Accordion (Numbered or unnumbered) -->
         <xsl:when test="starts-with($tblHeadingClass, 'bsaccordion') and ($convertformat = 'convert2daylight')">
             <xsl:variable name="accordionType">
                 <xsl:choose>
                 <xsl:when test="$tblHeadingClass = 'bsaccordionnumber'">
+                    <!-- Numbered -->
                     <xsl:text>accordion-num</xsl:text>
                 </xsl:when>
-                <xsl:otherwise> <!-- Numbered -->
+                <xsl:otherwise>
                     <xsl:text>clearfix</xsl:text>
                 </xsl:otherwise>
                 </xsl:choose>
@@ -738,6 +753,7 @@
                     </xsl:apply-templates>
             </div>
         </xsl:when>
+        <!-- Brightspace Daylight Jumbotron -->
         <xsl:when test="starts-with($tblHeadingClass, 'bsjumbotron') and ($convertformat = 'convert2daylight')">
             <div class="card card-graphic">
                <div class="card-body">
@@ -750,6 +766,7 @@
                </div>
             </div>
         </xsl:when>
+        <!-- Brightspace Daylight Audio -->
         <xsl:when test="starts-with($tblHeadingClass, 'bsaudio') and ($convertformat = 'convert2daylight')">
             <xsl:variable name="audioLink">
                 <xsl:value-of select="x:tbody/x:tr[1]/x:td[2]/descendant::x:a[1]/@href"/>
@@ -763,7 +780,8 @@
                 </div>
             </div>
         </xsl:when>
-        <xsl:when test="starts-with($tblHeadingClass, 'bsvideo') and ($convertformat = 'convert2daylight')">
+        <!-- Brightspace Daylight and Bootstrap Video -->
+        <xsl:when test="starts-with($tblHeadingClass, 'bsvideo')">
             <xsl:variable name="videoLink">
                 <xsl:value-of select="x:tbody/x:tr[1]/x:td[2]//x:a[1]/@href"/>
             </xsl:variable>
@@ -780,7 +798,7 @@
                     <xsl:value-of select="concat('video/', $fileSuffix)"/>
                 </xsl:otherwise>
                 </xsl:choose>
-                <xsl:value-of select="concat('video/', $fileSuffix)"/>
+                <!-- <xsl:value-of select="concat('video/', $fileSuffix)"/> -->
             </xsl:variable>
             <xsl:variable name="linkText" select="x:tbody/x:tr[1]/x:td[2]/x:p[1]/*"/>
 
@@ -811,6 +829,27 @@
                 </div>
             </div>
         </xsl:when>
+        <!-- Bootstrap Jumbotron -->
+        <xsl:when test="starts-with($tblHeadingClass, 'bsjumbotron') and ($convertformat = 'convert2bootstrap')">
+            <div class="jumbotron">
+                <i class="fa-solid fa-info fa-5x float-left">&#160;</i>
+                <xsl:apply-templates select="x:tbody/x:tr[1]/x:td[2]/*"/>
+            </div>
+        </xsl:when>
+        <!-- Bootstrap Audio -->
+        <xsl:when test="starts-with($tblHeadingClass, 'bsaudio') and ($convertformat = 'convert2bootstrap')">
+            <xsl:variable name="audioLink">
+                <xsl:value-of select="x:tbody/x:tr[1]/x:td[2]/descendant::x:a[1]/@href"/>
+            </xsl:variable>
+            <xsl:variable name="linkText" select="x:tbody/x:tr[1]/x:td[2]/x:p[1]"/>
+            <div class="card">
+                <div class="card-body fa-solid fa-headphones fa-5x">
+                    <audio title="{$linkText}" controls="controls">
+                        <source src="{$audioLink}" type="audio/mp3"/>
+                    </audio>
+                </div>
+            </div>
+        </xsl:when>
         <!-- Brightspace (not Bootstrap) CreatorPlus Carousel -->
         <xsl:when test="starts-with($tblHeadingClass, 'bscarousel') and ($convertformat = 'convert2daylight')">
             <div class="d2l-element" role="section">
@@ -818,11 +857,40 @@
                 <div class="instruction" data-prop="0|null">Click the arrow links to progress through slides.</div>
                 <div class="d2l-cplus-carousel">
                     <div class="d2l-cplus-carousel-slides-container">
-                        <xsl:apply-templates select="x:tbody/x:tr" mode="BSCarousel">
+                        <xsl:apply-templates select="x:tbody/x:tr" mode="DLCarousel">
                             <xsl:with-param name="nRows" select="$tabRows"/>
                         </xsl:apply-templates>
                     </div>
                 </div>
+            </div>
+        </xsl:when>
+        <!-- Bootstrap Carousel, cf. https://getbootstrap.com/docs/4.6/components/carousel/ -->
+        <xsl:when test="starts-with($tblHeadingClass, 'bscarousel') and ($convertformat = 'convert2bootstrap')">
+            <xsl:variable name="carouselRefID" select="concat('car', position())"/>
+            <div class="carousel slide" id="{$carouselRefID}" data-ride="carousel">
+                <!-- Display visible carousel item indicators -->
+                <ol class="carousel-indicators">
+                    <xsl:apply-templates select="x:tbody/x:tr" mode="BSCarouselIndicators">
+                        <xsl:with-param name="carouselRefID" select="$carouselRefID"/>
+                    </xsl:apply-templates>
+                </ol>
+
+                <!-- Individual carousel items -->
+                <div  class="carousel-inner">
+                    <xsl:apply-templates select="x:tbody/x:tr" mode="BSCarousel">
+                        <xsl:with-param name="nRows" select="$tabRows"/>
+                    </xsl:apply-templates>
+                </div>
+
+                <!-- Forward and back buttons -->
+                <button class="carousel-control-prev" type="button" data-target="{concat('#', $carouselRefID)}" data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-target="{concat('#', $carouselRefID)}" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                </button>
             </div>
         </xsl:when>
         <xsl:when test="starts-with($tblHeadingClass, 'heading') and ($convertformat = 'convert2daylight')">
@@ -1035,10 +1103,19 @@
         <xsl:param name="nRows"/>
         <xsl:param name="flipClass"/>
         <xsl:param name="colSpanClass"/>
+        <xsl:param name="tblHeadingClass"/>
+
+        <!-- Bootstrap uses 'content' class, so add a prefix to avoid formatting issues. -->
+        <xsl:variable name="contentClass">
+            <xsl:if test="$tblHeadingClass = 'content2bootstrap'">
+                <xsl:text>card-</xsl:text>
+            </xsl:if>
+            <xsl:text>content</xsl:text>
+        </xsl:variable>
 
         <div class="{$colSpanClass}">
             <div class="card">
-                <div class="content">
+                <div class="{$contentClass}">
                     <div class="card-front" role="button" tabindex="0">
                         <xsl:apply-templates select="x:td[1]/*"/>
                     </div>
@@ -1168,7 +1245,7 @@
         </div>
     </xsl:template>
 
-    <!-- Daylight: Vertical tab list -->
+    <!-- Brightspace Daylight: Vertical tab list -->
     <xsl:template match="x:td" mode="DLTabVertList">
         <xsl:param name="tblSeqNum"/>
         <xsl:variable name="listRefID" select="concat('vtab', $tblSeqNum, '_', position())"/>
@@ -1184,7 +1261,7 @@
         </li>
     </xsl:template>
 
-    <!-- Daylight: Vertical tab content -->
+    <!-- Brightspace Daylight: Vertical tab content -->
     <xsl:template match="x:td" mode="DLTabVertContent">
         <xsl:param name="tblSeqNum"/>
         <!-- First item is active, the rest are not -->
@@ -1204,6 +1281,7 @@
     <!-- See https://getbootstrap.com/docs/4.1/components/collapse/#accordion-example -->
     <xsl:template match="x:tr" mode="BSAccordionContent">
         <xsl:param name="accordionName"/>
+        <xsl:param name="accordionType"/>
         <xsl:variable name="cellCount" select="count(x:td)"/>
         <xsl:variable name="cellClass" select="x:td[1]/x:p[1]/@class"/>
 
@@ -1221,7 +1299,10 @@
                 <div class="card-header" id="{$targetLabel}">
                     <!-- Use h4 as a default for the moment -->
                     <h4 class="mb-0">
-                         <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="{concat('#', $targetCard)}" aria-expanded="false" aria-controls="{$targetCard}">
+                        <button class="btn btn-link btn-block text-left fw-bold" type="button" data-toggle="collapse" data-target="{concat('#', $targetCard)}" aria-expanded="false" aria-controls="{$targetCard}">
+                            <xsl:if test="$accordionType = 'numbered'">
+                                <xsl:value-of select="concat(position(), ' ')"/>
+                            </xsl:if>
                             <xsl:apply-templates select="x:td[1]/x:p[1]" mode="BSAccordionContent"/>
                         </button>
                     </h4>
@@ -1297,7 +1378,7 @@
     </xsl:template>
 
     <!-- Brightspace CreatorPlus Carousel -->
-    <xsl:template match="x:tr" mode="BSCarousel">
+    <xsl:template match="x:tr" mode="DLCarousel">
         <xsl:variable name="posIndex" select="position() - 1"/>
         <xsl:variable name="firstElementName" select="name(x:td[1]/*[1])"/>
         <xsl:variable name="firstElementClass" select="x:td[1]/*[1]/@class"/>
@@ -1308,7 +1389,7 @@
                 <xsl:apply-templates select="x:td[1]/*[1]"/>
             </div>
             <div class="d2l-cplus-carousel-slide-image-container">
-                <xsl:apply-templates select="x:td[2]/x:p/x:img" mode="BSCarouselImage"/>
+                <xsl:apply-templates select="x:td[2]/x:p/x:img" mode="DLCarouselImage"/>
             </div>
             <div class="d2l-cplus-carousel-slide-body">
                 <div class="d2l-cplus-carousel-slide-text" data-carouselprop="{concat($posIndex, '|text')}">
@@ -1319,8 +1400,58 @@
     </xsl:template>
     
     <!-- Brightspace CreatorPlus Carousel Image -->
-    <xsl:template match="x:img" mode="BSCarouselImage">
+    <xsl:template match="x:img" mode="DLCarouselImage">
         <img width="{@width}" height="{@height}" src="{@src}" longdesc="{@longdesc}" class="d2l-cplus-carousel-slide-image">
+            <xsl:if test="@id">
+                <xsl:attribute name="id" select="@id"/>
+            </xsl:if>
+            <xsl:if test="not(@alt) and @longdesc">
+                <xsl:attribute name="alt" select="@longdesc"/>
+            </xsl:if>
+        </img>
+        
+    </xsl:template>
+
+    <!-- Bootstrap 4.6 Carousel, cf. https://getbootstrap.com/docs/4.6/components/carousel/ -->
+    <xsl:template match="x:tr" mode="BSCarousel">
+        <xsl:variable name="posIndex" select="position() - 1"/>
+        <xsl:variable name="firstElementName" select="name(x:td[1]/*[1])"/>
+        <xsl:variable name="firstElementClass" select="x:td[1]/*[1]/@class"/>
+        <xsl:variable name="imageElement" select="name(x:td[1]/*[2])"/>
+
+        <!-- First item is active, the rest are not -->
+        <xsl:variable name="activeClass">
+            <xsl:if test="position() = 1">
+                <xsl:text> active</xsl:text>
+            </xsl:if>
+        </xsl:variable>
+
+        <div class="{concat('carousel-item', $activeClass)}">
+            <xsl:apply-templates select="x:td[2]/x:p/x:img" mode="BSCarouselImage"/>
+            <div class="carousel-caption d-none d-md-block">
+                <xsl:apply-templates select="x:td[1]/*[1]"/>
+                <xsl:apply-templates select="x:td[3]/*"/>
+            </div>
+        </div>
+    </xsl:template>
+
+    <!-- Bootstrap 4.6 Carousel item indicators -->
+    <xsl:template match="x:tr" mode="BSCarouselIndicators">
+        <xsl:param name="carouselRefID"/>
+        <xsl:variable name="posIndex" select="position() - 1"/>
+
+        <li data-target="{concat('#', $carouselRefID)}" data-slide-to="{$posIndex}">
+            <!-- First item is active, the rest are not -->
+            <xsl:if test="position() = 1">
+                <xsl:attribute name="class"><xsl:text>active</xsl:text></xsl:attribute>
+            </xsl:if>
+        </li>
+    </xsl:template>
+
+    <!-- Bootstrap carousel background image -->
+    <xsl:template match="x:img" mode="BSCarouselImage">
+        <!-- Unused: width="{@width}" height="{@height}" -->
+        <img src="{@src}" class="d-block w-100">
             <xsl:if test="@id">
                 <xsl:attribute name="id" select="@id"/>
             </xsl:if>

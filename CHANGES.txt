@@ -1,10 +1,7 @@
 # Change log
 
 Date          Version   Comment
-2024/01/08    1.4.13    Add support for selecting transformation type, and add Bootstrap Accordion.
-2023/12/22    1.4.13    Add support for formatted tables, heading IDs, etc.
-2023/12/21    1.4.13    Add support for video and audio links.
-2023/12/15    1.4.13    Support D2L constructs for tab groups, collapsibles, carousel, etc.
+2024/03/12    1.4.13    Add support for Bootstrap and Brightspace artefacts (carousels, accordions, flipcards, tab lists).
 2023/02/15    1.4.12    Fix PHP 8 warnings.
 2021/08/31    1.4.11    Improve question import support.
 2021/08/21    1.4.10    Support import of Word questions, convert GIF images, manage access to import/export facilities.

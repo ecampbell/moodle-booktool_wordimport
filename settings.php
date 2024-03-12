@@ -24,6 +24,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$ADMIN->add('booktoolwordimport', new admin_category('booktool_wordimport', new lang_string('pluginname', 'booktool_wordimport')));
+$settings = new admin_settingpage('booktool_wordimport_settings', new lang_string('settings', 'booktool_wordimport'));
+
 if ($ADMIN->fulltree) {
     // What HTML heading element should be used for the Word Heading 1 style?
     $name = new lang_string('heading1stylelevel', 'booktool_wordimport');

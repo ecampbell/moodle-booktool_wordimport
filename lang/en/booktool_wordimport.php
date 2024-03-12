@@ -25,8 +25,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['cannotopentempfile'] = 'Cannot open temporary file <b>{$a}</b>';
-$string['convert2bootstrap4'] = 'Convert to Bootstrap components';
-$string['convert2bootstrap5'] = 'Bootstrap 5';
+$string['convert2bootstrap4'] = 'Convert to Bootstrap';
+$string['convert2bootstrap5'] = 'Convert to Bootstrap 5';
 $string['convert2daylight'] = 'Convert to Daylight (Brightspace)';
 $string['convert2none'] = 'None';
 $string['convertformat'] = 'Conversion type';
