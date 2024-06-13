@@ -90,6 +90,7 @@
     <xsl:param name="imagehandling"/>
     <xsl:param name="moodle_language"/>
     <xsl:param name="moodle_textdirection"/>
+    <xsl:param name="convertformat" select="'convert2bootstrap'"/>
 
     <xsl:output method="xml" encoding="utf-8" indent="no" omit-xml-declaration="yes"/>
 
@@ -3962,11 +3963,20 @@
             <xsl:value-of select="w:tblPr[1]/w:tblStyle[1]/@w:val"/>
         </xsl:variable>
 
-        <!-- Check if this table is a question meta-table, to distinguish between tables inside the content -->
+        <!-- Check if this table is a question or Bootstrap/Daylight meta-table, to distinguish between tables inside the content -->
         <xsl:variable name="tableType">
-            <xsl:if test="w:tr[1]/w:tc[2]/w:p[1]/w:pPr[1]/w:pStyle[1]/@w:val = 'QFType'">
+            <xsl:variable name="metaTable" select="w:tr[1]/w:tc[2]/w:p[1]/w:pPr[1]/w:pStyle[1]/@w:val"/>
+            <xsl:choose>
+            <xsl:when test="$metaTable = 'QFType'">
                 <xsl:value-of select="' moodleQuestion'"/>
-            </xsl:if>
+            </xsl:when>
+            <xsl:when test="$metaTable = 'BSComponent' and $convertformat = 'convert2bootstrap'">
+                <xsl:value-of select="' moodleBootstrap'"/>
+            </xsl:when>
+            <xsl:when test="$metaTable = 'BSComponent' and $convertformat = 'convert2daylight'">
+                <xsl:value-of select="' brightspaceDaylight'"/>
+            </xsl:when>
+            </xsl:choose>
         </xsl:variable>
 
         <xsl:attribute name="class"><xsl:value-of select="concat($tStyleId, $tableType)"/></xsl:attribute>
