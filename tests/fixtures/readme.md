@@ -19,13 +19,13 @@ Here are the steps to install the template in the correct location.
    The complete path is displayed in the Path field at the top of the box. 
 
 5. Click on the white space area at the end of the path field to select the complete path,
-   and copy it by pressing "<Ctrl>+C".
+   and copy it by pressing "\<Ctrl>+C".
 
 6. The path is all you need, so just exit Word now.
 
-7. Start Windows "File Explorer" (press the "<Windows>+E" key combination).
+7. Start Windows "File Explorer" (press the "\<Windows>+E" key combination).
 
-8. Click the path field, paste in the path ("<Ctrl>+V"), and press <Return>.
+8. Click the path field, paste in the path ("\<Ctrl>+V"), and press <Return>.
 
 9. Start another "File Explorer" window, go to the location where you downloaded the template to,
    and drag and drop the file to the startup folder.
