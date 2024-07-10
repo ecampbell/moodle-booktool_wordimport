@@ -655,7 +655,7 @@
         <!-- Bootstrap Carousel, cf. https://getbootstrap.com/docs/4.6/components/carousel/ -->
         <xsl:when test="$bsComponent = 'CA' and ($tblClass = 'moodleBootstrap')">
             <xsl:variable name="carouselRefID" select="concat('car', position())"/>
-            <div class="carousel slide" id="{$carouselRefID}" data-ride="carousel">
+            <div class="carousel slide" id="{$carouselRefID}">
                 <!-- Display visible carousel item indicators -->
                 <ol class="carousel-indicators">
                     <xsl:apply-templates select="x:tbody/x:tr" mode="BSCarouselIndicators">
@@ -699,7 +699,7 @@
             </section>
         </xsl:when>
         <!-- Bootstrap Jumbotron: Audio -->
-        <xsl:when test="$bsComponent = 'JA' and ($tblClass = 'moodleBootstrap')">
+        <xsl:when test="($bsComponent = 'AU' or $bsComponent = 'JA') and ($tblClass = 'moodleBootstrap')">
             <xsl:variable name="audioLink">
                 <xsl:value-of select="x:tbody/x:tr[1]/x:td[2]/descendant::x:a[1]/@href"/>
             </xsl:variable>
@@ -713,13 +713,13 @@
             </div>
         </xsl:when>
        <!-- Bootstrap Jumbotron: Info, Word and PDF -->
-        <xsl:when test="($bsComponent = 'JB' or $bsComponent = 'JP' or $bsComponent = 'JW') and ($tblClass = 'moodleBootstrap')">
+        <xsl:when test="($bsComponent = 'JI' or $bsComponent = 'JP' or $bsComponent = 'JW') and ($tblClass = 'moodleBootstrap')">
             <xsl:variable name="jumbotronicon">
                 <xsl:choose>
-                <xsl:when test="$bsComponent = 'bsjumbotronword'">
+                <xsl:when test="$bsComponent = 'JW'">
                     <xsl:text>fa-file-word</xsl:text> <!-- Word document icon -->
                 </xsl:when>
-                <xsl:when test="$bsComponent = 'bsjumbotronpdf'">
+                <xsl:when test="$bsComponent = 'JP'">
                     <xsl:text>fa-file-pdf</xsl:text> <!-- PDF document icon -->
                 </xsl:when>
                 <xsl:otherwise>
@@ -820,7 +820,7 @@
             </div>
         </xsl:when>
         <!-- Brightspace Daylight Jumbotron with Info, PDF and Word icons passed through from Word -->
-        <xsl:when test="($bsComponent = 'JB' or $bsComponent = 'JP' or $bsComponent = 'JW') and ($tblClass = 'brightspaceDaylight')">
+        <xsl:when test="($bsComponent = 'JI' or $bsComponent = 'JP' or $bsComponent = 'JW') and ($tblClass = 'brightspaceDaylight')">
             <div class="card card-graphic">
                <div class="card-body">
                   <div class="card-icon">
@@ -894,7 +894,7 @@
             </div>
         </xsl:when>
         <!-- Brightspace Daylight and Bootstrap Video -->
-        <xsl:when test="$bsComponent = 'JV'">
+        <xsl:when test="$bsComponent = 'JV' or $bsComponent = 'VD'">
             <xsl:variable name="videoLink">
                 <xsl:value-of select="x:tbody/x:tr[1]/x:td[2]//x:a[1]/@href"/>
             </xsl:variable>
@@ -1216,8 +1216,11 @@
             </xsl:if>
         </xsl:variable>
 
-        <div class="{concat('carousel-item', $activeClass)}">
-            <xsl:apply-templates select="x:td[2]/x:p/x:img" mode="BSCarouselImage"/>
+        <!-- Don't auto-cycle through the carousel -->
+        <div class="{concat('carousel-item', $activeClass)}" data-interval="false">
+            <p style="vertical-align: baseline; text-align: center;">
+                <xsl:apply-templates select="x:td[2]/x:p/x:img" mode="BSCarouselImage"/>
+            </p>
             <div class="carousel-caption d-none d-md-block">
                 <xsl:apply-templates select="x:td[1]/*[1]"/>
                 <xsl:apply-templates select="x:td[3]/*"/>
@@ -1242,11 +1245,20 @@
     <xsl:template match="x:img" mode="BSCarouselImage">
         <!-- Unused: width="{@width}" height="{@height}" -->
         <img src="{@src}" class="d-block w-100">
+            <xsl:if test="@width">
+                <xsl:attribute name="width" select="{@width}"/>
+            </xsl:if>
+            <xsl:if test="@height">
+                <xsl:attribute name="height" select="{@height}"/>
+            </xsl:if>
             <xsl:if test="@id">
-                <xsl:attribute name="id" select="@id"/>
+                <xsl:attribute name="id" select="{@id}"/>
+            </xsl:if>
+            <xsl:if test="@alt">
+                <xsl:attribute name="alt" select="{@alt}"/>
             </xsl:if>
             <xsl:if test="not(@alt) and @longdesc">
-                <xsl:attribute name="alt" select="@longdesc"/>
+                <xsl:attribute name="alt" select="{@longdesc}"/>
             </xsl:if>
         </img>
         
