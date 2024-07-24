@@ -627,8 +627,7 @@
             </xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
-        <xsl:comment><xsl:value-of select="concat('bsComponent: ', $bsComponent, '; bsComponentClass: ', $bsComponentClass)"/></xsl:comment>
-        
+
         <!-- Check for special tables containing Bootstrap/Daylight components -->
         <xsl:choose>
         <!-- Bootstrap Accordion, cf. https://getbootstrap.com/docs/4.6/components/collapse/#accordion-example) -->
@@ -698,22 +697,8 @@
                 </div>
             </section>
         </xsl:when>
-        <!-- Bootstrap Jumbotron: Audio -->
-        <xsl:when test="($bsComponent = 'AU' or $bsComponent = 'JA') and ($tblClass = 'moodleBootstrap')">
-            <xsl:variable name="audioLink">
-                <xsl:value-of select="x:tbody/x:tr[1]/x:td[2]/descendant::x:a[1]/@href"/>
-            </xsl:variable>
-            <xsl:variable name="linkText" select="x:tbody/x:tr[1]/x:td[2]/x:p[1]"/>
-            <div class="card">
-                <div class="card-body fa-solid fa-headphones fa-5x">
-                    <audio title="{$linkText}" controls="controls">
-                        <source src="{$audioLink}" type="audio/mp3"/>
-                    </audio>
-                </div>
-            </div>
-        </xsl:when>
-       <!-- Bootstrap Jumbotron: Info, Word and PDF -->
-        <xsl:when test="($bsComponent = 'JI' or $bsComponent = 'JP' or $bsComponent = 'JW') and ($tblClass = 'moodleBootstrap')">
+        <!-- Bootstrap Jumbotron: Word and PDF -->
+        <xsl:when test="($bsComponent = 'JP' or $bsComponent = 'JW') and ($tblClass = 'moodleBootstrap')">
             <xsl:variable name="jumbotronicon">
                 <xsl:choose>
                 <xsl:when test="$bsComponent = 'JW'">
@@ -722,14 +707,20 @@
                 <xsl:when test="$bsComponent = 'JP'">
                     <xsl:text>fa-file-pdf</xsl:text> <!-- PDF document icon -->
                 </xsl:when>
-                <xsl:otherwise>
-                    <xsl:text>fa-info</xsl:text> <!-- Info icon 'i' -->
-                </xsl:otherwise>
                 </xsl:choose>
             </xsl:variable>
-            <div class="jumbotron">
-                <i class="{concat('fa-solid ', $jumbotronicon, ' fa-5x float-left')}">&#160;</i>
-                <xsl:apply-templates select="x:tbody/x:tr[1]/x:td[2]/*"/>
+
+            <div class="card mb-3" style="max-width: 540px;">
+                <div class="row no-gutters">
+                    <div class="col-md-4">
+                        <i class="{concat('fa-solid ', $jumbotronicon, ' fa-5x float-left')}">&#160;</i>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <xsl:apply-templates select="x:tbody/x:tr[1]/x:td[2]/*"/>
+                        </div>
+                    </div>
+                </div>
             </div>
         </xsl:when>
         <!-- Bootstrap horizontal tab group, cf. https://getbootstrap.com/docs/4.6/components/navs/#tabs -->
@@ -819,17 +810,30 @@
                 </div>
             </div>
         </xsl:when>
-        <!-- Brightspace Daylight Jumbotron with Info, PDF and Word icons passed through from Word -->
-        <xsl:when test="($bsComponent = 'JI' or $bsComponent = 'JP' or $bsComponent = 'JW') and ($tblClass = 'brightspaceDaylight')">
-            <div class="card card-graphic">
-               <div class="card-body">
-                  <div class="card-icon">
-                     <xsl:apply-templates select="x:tbody/x:tr[1]/x:td[1]/*"/>
-                  </div>
-                  <div class="card-text">
-                     <xsl:apply-templates select="x:tbody/x:tr[1]/x:td[2]/*"/>
-                  </div>
-               </div>
+        <!-- Brightspace Daylight PDF and Word icons passed through from Word -->
+        <xsl:when test="($bsComponent = 'JP' or $bsComponent = 'JW') and ($tblClass = 'brightspaceDaylight')">
+            <xsl:variable name="altText">
+                <xsl:choose>
+                <xsl:when test="$bsComponent = 'JP'">
+                    <xsl:text>PDF File</xsl:text>
+                </xsl:when>
+                <xsl:when test="$bsComponent = 'JW'">
+                    <xsl:text>Word File</xsl:text>
+                </xsl:when>
+                </xsl:choose>
+            </xsl:variable>
+
+            <div class="card mb-3" style="max-width: 540px;">
+                <div class="row no-gutters">
+                    <div class="col-md-4">
+                        <img src="{x:tbody/x:tr[1]/x:td[1]/descendant::x:img/@src}" alt="{$altText}" width="96" height="96"/>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <xsl:apply-templates select="x:tbody/x:tr[1]/x:td[2]/*"/>
+                        </div>
+                    </div>
+                </div>
             </div>
         </xsl:when>
          <!-- Brightspace Daylight horizontal tabs -->
@@ -872,7 +876,37 @@
                 </div>
             </div>
         </xsl:when>
-        <!-- Brightspace Daylight and Bootstrap Flipcard -->
+        <!-- Brightspace Daylight and Moodle Bootstrap Audio -->
+        <xsl:when test="$bsComponent = 'AU'">
+            <xsl:variable name="audioLink">
+                <xsl:value-of select="x:tbody/x:tr[1]/x:td[2]/descendant::x:a[1]/@href"/>
+            </xsl:variable>
+            <xsl:variable name="linkText" select="x:tbody/x:tr[1]/x:td[2]/x:p[1]"/>
+            <xsl:variable name="cardBodyClass">
+                <xsl:text>card-body</xsl:text>
+                <xsl:if test="$tblClass = 'moodleBootstrap'">
+                    <xsl:text> fa-headphones fa-5x</xsl:text>
+                </xsl:if>
+            </xsl:variable>
+
+            <div class="card mb-3" style="max-width: 540px;">
+                <div class="row no-gutters">
+                    <xsl:if test="$tblClass = 'brightspaceDaylight'">
+                        <div class="col-md-4">
+                          <img src="{x:tbody/x:tr[1]/x:td[1]/x:p[1]/x:img/@src}" alt="Audio file" width="96" height="96"/>
+                        </div>
+                    </xsl:if>
+                    <div class="col-md-8">
+                        <div class="{$cardBodyClass}">
+                            <audio title="{$linkText}" controls="controls">
+                                <source src="{$audioLink}" type="audio/mp3"/>
+                            </audio>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xsl:when>
+        <!-- Brightspace Daylight and Moodle Bootstrap Flipcard -->
         <xsl:when test="$bsComponent = 'FC' and ($tblClass = 'brightspaceDaylight' or $tblClass = 'moodleBootstrap')">
             <xsl:variable name="flipClass">
                 <xsl:choose>
@@ -893,8 +927,21 @@
                 </xsl:apply-templates>
             </div>
         </xsl:when>
-        <!-- Brightspace Daylight and Bootstrap Video -->
-        <xsl:when test="$bsComponent = 'JV' or $bsComponent = 'VD'">
+        <!-- Brightspace Daylight and Moodle Bootstrap Info -->
+        <xsl:when test="$bsComponent = 'JI'">
+            <div class="card mb-0">
+                <div class="row no-gutters">
+                    <div class="col-md-4" style="font-size: 10vw; font-weight: bold; text-align: center">i</div>
+                    <div class="col-md-8">
+                        <div class="card-body font-weight-bolder lead" style="font-size: 2vw; font-weight: bold; text-align: left">
+                            <xsl:apply-templates select="x:tbody/x:tr[1]/x:td[2]/*"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xsl:when>
+        <!-- Brightspace Daylight and Moodle Bootstrap Video -->
+        <xsl:when test="$bsComponent = 'VD'">
             <xsl:variable name="videoLink">
                 <xsl:value-of select="x:tbody/x:tr[1]/x:td[2]//x:a[1]/@href"/>
             </xsl:variable>
@@ -915,7 +962,7 @@
             </xsl:variable>
             <xsl:variable name="linkText" select="x:tbody/x:tr[1]/x:td[2]/x:p[1]/*"/>
 
-            <div class="card">
+            <div class="card mb-0">
                 <div class="col-xs-12 col-sm-offset-1 col-sm-10">
                     <div class="video-wrapper card-img-top">
                         <div class="embed-responsive embed-responsive-16by9 card-body">
@@ -931,7 +978,6 @@
                                     <!-- Use the video element instead of iframe, to keep Lucimoo ePub export happier -->
                                     <video src="{$videoLink}" type="{$videoType}" title="{$linkText}" class="embed-responsive-item" width="600" height="400" controls="controls">
                                         <source src="{$videoLink}" type="{$videoType}" title="{$linkText}"/>
-                                        <xsl:comment><xsl:value-of select="concat('videoLink: ', $videoLink, '; fileSuffix: ', $fileSuffix)"/></xsl:comment>
                                     </video>
                                 </xsl:otherwise>
                                 </xsl:choose>
@@ -977,14 +1023,21 @@
 
     <!-- Use Bootstrap dark table heading -->
     <xsl:template match="x:thead">
-        <thead>
-            <xsl:attribute name="class">
-                <xsl:text>thead-dark</xsl:text>
-            </xsl:attribute>
-            <!-- Dump any class attribute already present -->
-            <xsl:apply-templates select="@*[local-name() != 'class']"/>
-            <xsl:apply-templates/>
-        </thead>
+        <xsl:choose>
+        <xsl:when test="x:tr[1]/x:th[2]/x:p[1]/@class = 'bscomponent2'">
+            <xsl:comment><xsl:text>Caught in thead</xsl:text></xsl:comment>
+        </xsl:when>
+        <xsl:otherwise>
+            <thead>
+                <xsl:attribute name="class">
+                    <xsl:text>thead-dark</xsl:text>
+                </xsl:attribute>
+                <!-- Dump any class attribute already present -->
+                <xsl:apply-templates select="@*[local-name() != 'class']"/>
+                <xsl:apply-templates/>
+            </thead>
+        </xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
 
     <!-- Omit table titles, since they are included in the table itself-->
@@ -1070,10 +1123,10 @@
     </xsl:template>
 
     <!-- Block quotes - wrap them in a blockquote wrapper -->
-    <xsl:template match="x:p[@class = 'blockquote' or @class = 'block quote']">
+    <xsl:template match="x:p[@class = 'blocktext' or @class = 'blockquote' or @class = 'block quote']">
         <xsl:variable name="paraClass" select="@class"/>
-        <xsl:if test="not(starts-with(preceding-sibling::x:p[1]/@class, 'blockquote'))">
-            <blockquote>
+        <xsl:if test="not(starts-with(preceding-sibling::x:p[1]/@class, 'blocktext'))">
+            <blockquote class="blockquote text-center">
                 <p>
                     <xsl:for-each select="@*">
                         <xsl:if test="name() != 'class'">
