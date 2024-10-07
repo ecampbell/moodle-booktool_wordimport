@@ -1,0 +1,47 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<!--
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+ * Brightspace-compatible XHTML file which acts as a template to wrap XHTML content extracted from a book chapter
+ *
+ * @package    booktool_wordimport
+ * @copyright  2024 Eoin Campbell
+ * @author     Eoin Campbell
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later (5)
+-->
+  <head>
+    <title>
+      <?replace insert-title?>
+    </title>
+    <link rel="stylesheet" href="/shared/HTML-Template-Library/Daylight_HTML_Template/module_templates/../assets/thirdpartylib/bootstrap-3.3.6/css/bootstrap.min.css"/><link rel="stylesheet" href="HTML-Template-Library/Daylight_2020/assets/css/styles.min.css"/><!-- Course Styles -->
+
+    <link rel="stylesheet" href="/shared/HTML-Template-Library/Daylight_HTML_Template/module_templates/../assets/css/main.min.css"/><link rel="stylesheet" href="HTML-Template-Library/Daylight_2020/assets/css/custom.css"/></head>
+  </head>
+  <body>
+    <div class="container-fluid"><main><div class="row"><div id='ch510' class='col-xs-12 col-sm-offset-1 col-sm-10'>
+    <?replace insert-content?>
+  </div></main></div><!-- jQuery local fallback (Bootstrap Dependency) -->
+<script src="/shared/HTML-Template-Library/Daylight_HTML_Template/module_templates/../assets/thirdpartylib/jquery/jquery-1.11.3.min.js"></script>
+<!-- Bootstrap CDN JS -->
+<script src="/shared/HTML-Template-Library/Daylight_HTML_Template/module_templates/../assets/thirdpartylib/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+<!-- SVG Fallback JS -->
+<script src="/shared/HTML-Template-Library/Daylight_HTML_Template/module_templates/../assets/thirdpartylib/svg4everybody/svg4everybody.min.js"></script>
+<!-- Course Scripts -->
+<script src="HTML-Template-Library/Daylight_2020/assets/js/main.min.js"></script>
+<!-- CreatorPlus scripts used by Carousel -->
+<script src="HTML-Template-Library/Daylight_2020/assets/js/scripts.min.js"></script>
+  </body>
+</html>

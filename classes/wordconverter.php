@@ -410,7 +410,7 @@ class wordconverter {
      * @param array $images Array of image data
      * @return \ZipArchive Stored Zip file information
      */
-    public function zip_images(string $zipfilename, array $images) {
+    public function zip_imported_images(string $zipfilename, array $images) {
         // Create a temporary Zip file.
         $zipfile = new \ZipArchive();
         unlink($zipfilename);
@@ -423,6 +423,56 @@ class wordconverter {
         if (count($images) > 0) {
             foreach ($images as $imagename => $imagedata) {
                 $zipfile->addFromString($imagename, $imagedata);
+            }
+        }
+        return $zipfile;
+    }
+
+    /**
+     * Get images from a chapter and write them to a Zip file
+     *
+     * A Zip file is returned.
+     *
+     * @param string $bookid Book ID
+     * @param string $contextid the context ID
+     * @param string $zipfilename Name and location of Zip file to create
+     * @param string $chapterid the chapter or page ID (optional)
+     * @return \ZipArchive Stored Zip file information
+     */
+    public function chapter_images(string $bookid, string $contextid, string $zipfilename, $chapterid = null) {
+        $component = 'mod_book';
+        $filearea = 'chapter';
+        $imagefolder = 'images';
+        // Create a temporary Zip file.
+        $zipfile = new \ZipArchive();
+        unlink($zipfilename);
+        if (!($zipfile->open($zipfilename, ZipArchive::CREATE))) {
+            // Cannot open zip file.
+            throw new \moodle_exception('cannotopenzip', 'error');
+        }
+        $zipfile->addEmptyDir($imagefolder);
+
+        if ($chapterid == 0) {
+            $allchapters = $DB->get_records('book_chapters', array('bookid' => $bookid), 'pagenum');
+        } else {
+            $allchapters[0] = $DB->get_record('book_chapters', array('bookid' => $bookid, 'id' => $chapterid), '*', MUST_EXIST);
+        }
+
+
+        $fs = get_file_storage();
+        foreach ($allchapters as $chapter) {
+            // Get the list of files embedded in the chapter.
+            $files = $fs->get_area_files($contextid, $component, $filearea, $chapterid);
+
+            // Add the images from the chapter to the '/images/' folder in the Zip file.
+            foreach ($files as $fileinfo) {
+                // Add each image to the zip file.
+                $filename = $fileinfo->get_filename();
+                $fileitemid = $fileinfo->get_itemid();
+                $filepath = $fileinfo->get_filepath();
+                $filedata = $fs->get_file($contextid, $component, $filearea, $fileitemid, $filepath, $filename);
+                $imagedata = $filedata->get_content();
+                $zipfile->addFromString($imagefolder . $filename, $imagedata);
             }
         }
         return $zipfile;
@@ -487,6 +537,48 @@ class wordconverter {
             return '<div class="ImageFile">' . $imagestring . '</div>';
         }
         return '';
+    }
+
+    /**
+     * Get images and write them as base64 inside the HTML content for Word export
+     *
+     * A string containing the HTML with embedded base64 images is returned.
+     * If the images are in GIF format, convert them to PNG for Word compatibility.
+     *
+     * @param string $contextid the context ID
+     * @param string $component File component: book, question, glossary, lesson
+     * @param string $filearea File area within component
+     * @param ZipArchive $zipfile Zip file to store images
+     * @param string $chapterid the chapter or page ID (optional)
+     * @return void
+     */
+    public function zip_chapter_images(string $contextid, string $component, string $filearea, ZipArchive $zipfile, $chapterid = null) {
+        // Get the list of files embedded in the book or chapter.
+        // Note that this will break on images in the Book Intro section.
+        $fs = get_file_storage();
+        if ($filearea == 'intro') {
+            $files = $fs->get_area_files($contextid, $component, $filearea);
+        } else {
+            $files = $fs->get_area_files($contextid, $component, $filearea, $chapterid);
+        }
+
+        foreach ($files as $fileinfo) {
+            // Process image files, adding them to the Zip file.
+            $fileext = strtolower(pathinfo($fileinfo->get_filename(), PATHINFO_EXTENSION));
+            if ($fileext == 'png' || $fileext == 'jpg' || $fileext == 'jpeg' || $fileext == 'gif') {
+                $filename = $fileinfo->get_filename();
+                $filetype = ($fileext == 'jpg') ? 'jpeg' : $fileext;
+                $fileitemid = $fileinfo->get_itemid();
+                $filepath = $fileinfo->get_filepath();
+                $filedata = $fs->get_file($contextid, $component, $filearea, $fileitemid, $filepath, $filename);
+                $imagedata = $filedata->get_content();
+                if (!$filedata === false) {
+                    // Add the image into the Zip file.
+                    $zipfile->addFromString('images/' . $filename, $imagedata);
+                }
+            }
+        }
+        return;
     }
 
     /**

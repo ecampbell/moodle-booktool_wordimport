@@ -63,8 +63,11 @@ function booktool_wordimport_extend_settings_navigation(settings_navigation $set
         $url2 = new moodle_url('/mod/book/tool/wordimport/index.php', array('id' => $PAGE->cm->id, 'action' => 'export'));
         $url3 = new moodle_url('/mod/book/tool/wordimport/index.php',
                 array('id' => $PAGE->cm->id, 'chapterid' => $params['chapterid'], 'action' => 'export'));
+        $url4 = new moodle_url('/mod/book/tool/wordimport/index.php', array('id' => $PAGE->cm->id, 'action' => 'exporthtml'));
         $node->add(get_string('exportbook', 'booktool_wordimport'), $url2, navigation_node::TYPE_SETTING,
                 null, null, new pix_icon('f/document', '', 'moodle', array('class' => 'iconsmall', 'title' => '')));
+        $node->add(get_string('exporthtml', 'booktool_wordimport'), $url4, navigation_node::TYPE_SETTING,
+                null, null, new pix_icon('i/backup', '', 'moodle', array('class' => 'iconsmall', 'title' => '')));
         $node->add(get_string('exportchapter', 'booktool_wordimport'), $url3, navigation_node::TYPE_SETTING,
                 null, null, new pix_icon('f/document', '', 'moodle', array('class' => 'iconsmall', 'title' => '')));
     }

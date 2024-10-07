@@ -31,6 +31,7 @@ require_once($CFG->dirroot.'/mod/book/locallib.php');
 require_once($CFG->dirroot.'/mod/book/tool/importhtml/locallib.php');
 
 use \booktool_wordimport\wordconverter;
+use core_files\archive_writer;
 
 /**
  * Import HTML pages from a Word file
@@ -55,7 +56,7 @@ function booktool_wordimport_import(string $wordfilename, stdClass $book, contex
     // Store images in a Zip file and split the HTML file into sections.
     // Add the sections to the Zip file and store it in Moodles' file storage area.
     $zipfilename = tempnam($CFG->tempdir, "zip");
-    $zipfile = $word2xml->zip_images($zipfilename, $imagesforzipping);
+    $zipfile = $word2xml->zip_imported_images($zipfilename, $imagesforzipping);
     $word2xml->split_html($htmlcontent, $zipfile, $splitonsubheadings, $verbose);
     $zipfile = $word2xml->store_html($zipfilename, $zipfile, $context);
     unlink($zipfilename);
@@ -127,6 +128,84 @@ function booktool_wordimport_export(stdClass $book, context_module $context, int
     $booktext = $word2xml->export($booktext, 'booktool_wordimport', $moodlelabels, 'embedded');
     return $booktext;
 }
+
+/**
+ * Export Book or chapter to a set of HTML files and images in a Zip file
+ *
+ * @param stdClass $book Book to export
+ * @param context_module $context Current course context
+ * @param int $chapterid The chapter to export (optional)
+ * @return \ZipArchive Stored Zip file 
+ */
+function booktool_wordimport_exporthtml(stdClass $book, context_module $context, int $chapterid = 0) {
+    global $CFG, $DB, $COURSE;
+    $filetemplate = __DIR__ . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'xhtmfiletemplate.html';
+    $xsltstylesheet = __DIR__ . DIRECTORY_SEPARATOR . 'classes' . DIRECTORY_SEPARATOR . 'export2xhtml.xsl';
+
+    // Check the HTML template exists, and read it into a string.
+    if (!file_exists($filetemplate)) {
+        throw new \moodle_exception(get_string('templateunavailable', 'booktool_wordimport', $filetemplate));
+        return null;
+    } else {
+        $htmltemplate = "<htmltemplate>\n" . file_get_contents($filetemplate) . "\n</htmltemplate>\n";
+    }
+
+    // Create a Zip file name to store the book content.
+    $filenameparts = [
+        $COURSE->shortname,
+        $book->name,
+        date("Ymd-His"),
+    ];
+    $zipfilename = $CFG->tempdir . clean_filename(implode('-', $filenameparts). '.zip');
+    $zipfile = new \ZipArchive();
+    unlink($zipfilename);
+    if (!($zipfile->open($zipfilename, ZipArchive::CREATE))) {
+        // Cannot open zip file.
+        throw new \moodle_exception('cannotopenzip', 'error');
+    }
+    $zipfile->addEmptyDir('images');
+    
+    // Export a single chapter or the whole book into HTML.
+    $allchapters = array();
+    if ($chapterid == 0) {
+        $allchapters = $DB->get_records('book_chapters', array('bookid' => $book->id), 'pagenum');
+    } else {
+        $allchapters[0] = $DB->get_record('book_chapters', array('bookid' => $book->id, 'id' => $chapterid), '*', MUST_EXIST);
+    }
+
+    $chaptertext = '';
+    $word2xml = new wordconverter();
+
+    // Export each chapter into a separate HTML file.
+    foreach ($allchapters as $chapter) {
+        // Make sure the chapter is visible to the current user.
+        if (!$chapter->hidden || has_capability('mod/book:viewhiddenchapters', $context)) {
+            $chaptertext .= '<div class="chapter" id="' . $chapter->id . '">\n';
+            // Check if the chapter title is duplicated inside the content, and include it if not.
+            if (!$chapter->subchapter && !strpos($chapter->content, "<h1")) {
+                $chaptertext .= "<h1>" . $chapter->title . "</h1>\n";
+            } else if ($chapter->subchapter && !strpos($chapter->content, "<h2")) {
+                $chaptertext .= "<h2>" . $chapter->title . "</h2>\n";
+            }
+            $chaptertext .= $chapter->content . '\n</div>\n';
+            
+            // Add the HTML and images from this chapter into the Zip file.
+            $zipfile->addFromString('chap' . $chapter->id . '.htm', $chaptertext);
+            $word2xml->zip_chapter_images($context->id, 'mod_book', 'chapter', $zipfile, $chapter->id);
+
+            // Assemble the chapter contents and the HTML template into a single XML file for easier XSLT processing.
+            $chaptertext = "<container>\n<chaptertext><html xmlns='http://www.w3.org/1999/xhtml'><body>" .
+                $chapter->content . "</body></html></chaptertext>\n" . $htmltemplate . "</container>";
+
+            // Convert the XHTML string into standard output, with suitable links.
+            // $chaptertext = $word2xml->xsltransform($chaptertext, $xsltstylesheet);
+            // $zipfile->addFromString('chapter' . $chapter->id . '.htm', $chaptertext);
+        }
+    }
+    return $zipfile;
+}
+
+
 
 /**
  * Delete previously unzipped Word file

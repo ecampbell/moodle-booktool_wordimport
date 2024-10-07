@@ -34,6 +34,7 @@ $string['convertformat_help'] = 'Choose how to convert certain Word table struct
 $string['embeddedimageswarning'] = 'Warning: this file must be opened using Word 2020 or Word 365 in order to handle embedded images correctly.';
 $string['encodedimageswarning'] = 'Warning: this file contains encoded images. See <a href="http://www.moodle2word.net/mod/page/view.php?id=143">more information on how to convert them back into embedded images</a>.';
 $string['exportbook'] = 'Export book to Microsoft Word';
+$string['exporthtml'] = 'Export book to HTML';
 $string['exportchapter'] = 'Export this chapter to Microsoft Word';
 $string['importchapters'] = 'Import from Microsoft Word';
 $string['insertionpoint'] = 'Insert before current chapter';
@@ -48,6 +49,7 @@ $string['replacechapter_help'] = 'Replace the content chapter with the first cha
 $string['splitonsubheadings'] = 'Create subchapters based on subheadings';
 $string['splitonsubheadings_help'] = 'Subchapters will be created on "Heading 2" styles';
 $string['stylesheetunavailable'] = 'XSLT Stylesheet <b>{$a}</b> is not available';
+$string['templateunavailable'] = 'XHTML template <b>{$a}</b> is not available';
 $string['transformationfailed'] = 'XSLT transformation failed';
 $string['wordfile'] = 'Microsoft Word file';
 $string['wordfile_help'] = 'Upload <i>.docx</i> file saved from Microsoft Word or LibreOffice';

@@ -61,6 +61,11 @@ if ($mform->is_cancelled()) {
     $filename = clean_filename($book->name) . '.doc';
     send_file($booktext, $filename, 10, 0, true, array('filename' => $filename));
     die;
+} else if ($action == 'exporthtml') {
+    // Export the book into a set of HTML files in a Zip file.
+    $zipfile = booktool_wordimport_exporthtml($book, $context, $chapterid, $imageformat);
+    send_file($zipfile, "zipfile.zip", 10, 0, true, 'application/zip', false);
+    die;
 } else if ($data = $mform->get_data()) {
     // A Word file has been uploaded, so process it.
     echo $OUTPUT->header();
