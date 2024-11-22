@@ -4776,7 +4776,7 @@
         <xsl:when test="$img_hyperlink != ''">
             <!-- The image is linked -->
             <a href="{$img_hyperlink}">
-                <img src="{$img_src}" id="{$img_id}" name="{$img_basefilename}" alt="{$img_alt}" longdesc="{$img_longdesc}">
+                <img src="{$img_src}" id="{$img_id}" name="{$img_basefilename}" alt="{$img_alt}" >
                     <xsl:if test="$img_width != ''">
                         <xsl:attribute name="width">
                             <xsl:value-of select="$img_width"/>
@@ -4790,7 +4790,7 @@
         </xsl:when>
         <xsl:otherwise>
             <!-- The image is not linked -->
-            <img src="{$img_src}" id="{$img_id}" name="{$img_basefilename}" alt="{$img_alt}" longdesc="{$img_longdesc}">
+            <img src="{$img_src}" id="{$img_id}" name="{$img_basefilename}" alt="{$img_alt}" >
                 <xsl:if test="$img_width != ''">
                     <xsl:attribute name="width">
                         <xsl:value-of select="$img_width"/>
