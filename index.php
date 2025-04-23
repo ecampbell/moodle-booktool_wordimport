@@ -34,7 +34,7 @@ $imageformat = optional_param('imageformat', 'embedded', PARAM_TEXT); // Chapter
 
 // Security checks.
 list ($course, $cm) = get_course_and_cm_from_cmid($id, 'book');
-$book = $DB->get_record('book', array('id' => $cm->instance), '*', MUST_EXIST);
+$book = $DB->get_record('book', ['id' => $cm->instance], '*', MUST_EXIST);
 require_course_login($course, true, $cm);
 
 // Import or export allowed only if user has editing rights.
@@ -42,10 +42,10 @@ $context = context_module::instance($cm->id);
 require_capability('mod/book:edit', $context);
 
 // Set up page in case an import has been requested.
-$PAGE->set_url('/mod/book/tool/wordimport/index.php', array('id' => $id, 'chapterid' => $chapterid));
+$PAGE->set_url('/mod/book/tool/wordimport/index.php', ['id' => $id, 'chapterid' => $chapterid]);
 $PAGE->set_title($book->name);
 $PAGE->set_heading($course->fullname);
-$mform = new booktool_wordimport_form(null, array('id' => $id, 'chapterid' => $chapterid));
+$mform = new booktool_wordimport_form(null, ['id' => $id, 'chapterid' => $chapterid]);
 
 // If data submitted, then process and store.
 if ($mform->is_cancelled()) {
@@ -59,7 +59,7 @@ if ($mform->is_cancelled()) {
     // Export the book into a Word file.
     $booktext = booktool_wordimport_export($book, $context, $chapterid, $imageformat);
     $filename = clean_filename($book->name) . '.doc';
-    send_file($booktext, $filename, 10, 0, true, array('filename' => $filename));
+    send_file($booktext, $filename, 10, 0, true, ['filename' => $filename]);
     die;
 } else if ($data = $mform->get_data()) {
     // A Word file has been uploaded, so process it.
@@ -87,7 +87,7 @@ if ($mform->is_cancelled()) {
     // Convert the Word file content and import it into the book.
     booktool_wordimport_import($tmpfilename, $book, $context, $splitonsubheadings, $verbose);
 
-    echo $OUTPUT->continue_button(new moodle_url('/mod/book/view.php', array('id' => $id)));
+    echo $OUTPUT->continue_button(new moodle_url('/mod/book/view.php', ['id' => $id]));
     echo $OUTPUT->footer();
     die;
 }
