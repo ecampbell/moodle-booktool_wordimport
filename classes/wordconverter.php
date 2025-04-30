@@ -51,6 +51,9 @@ class wordconverter {
     /** @var string Stylesheet to export generic XHTML into Word-compatible XHTML. */
     private $exportstylesheet = __DIR__ . "/xhtml2wordpass2.xsl";
 
+    /** @var array Array of xslt paramters. */
+    private $xsltparameters = [];
+
     /**
      * Class constructor
      *
@@ -75,7 +78,7 @@ class wordconverter {
             'heading1stylelevel' => 3, // Atto, Books and Lessons are 3, Glossaries and Question banks should be overridden to 1.
             'pluginname' => $plugin,
             'debug_flag' => (debugging(null, DEBUG_DEVELOPER)) ? '1' : '0',
-            ];
+        ];
     }
 
     /**
